@@ -8,54 +8,133 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/btnStartServer"
         style="@style/Widget.AppCompat.Button"
-        android:layout_width="0dp"
+        android:layout_width="376dp"
         android:layout_height="wrap_content"
-        android:text="Join game"
-        android:enabled="false"
-        android:textSize="16sp"
         android:padding="12sp"
+        android:text="Start server"
+        android:textSize="16sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/btnStartClient"
         style="@style/Widget.AppCompat.Button"
-        android:layout_width="0dp"
+        android:layout_width="376dp"
         android:layout_height="wrap_content"
-        android:text="Create game"
-        android:textSize="16sp"
         android:padding="12sp"
-        android:enabled="false"
-        app:layout_constraintBottom_toTopOf="@+id/button"
+        android:text="Start client"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/btnStartServer"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.542"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/tvServerStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="TicTacToe development app"
-
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        app:layout_constraintBottom_toTopOf="@+id/button3"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/button2"
-        android:layout_width="0dp"
+        android:text="Server status: ..."
         android:textSize="16sp"
-        android:padding="12sp"
-        style="@style/Widget.AppCompat.Button"
+        app:layout_constraintBottom_toTopOf="@+id/btnStartClient"
+        app:layout_constraintStart_toStartOf="@+id/btnStartClient" />
+
+    <TextView
+        android:id="@+id/tvServerStatus2"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="(DEV) Join current game"
+        android:text="Client status: ..."
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/tvServerStatus"
+        app:layout_constraintStart_toStartOf="@+id/tvServerStatus" />
+
+    <TableLayout
+        android:layout_width="376dp"
+        android:layout_height="wrap_content"
+        android:stretchColumns="*"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:id="@+id/btnTable0"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="..." />
+
+            <Button
+                android:id="@+id/btnTable1"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="..." />
+
+            <Button
+                android:id="@+id/btnTable2"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="..." />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <Button
+                android:id="@+id/btnTable3"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="..." />
+
+            <Button
+                android:id="@+id/btnTable4"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="..." />
+
+            <Button
+                android:id="@+id/btnTable5"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="..." />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <Button
+                android:id="@+id/btnTable6"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="..." />
+
+            <Button
+                android:id="@+id/btnTable7"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:text="..." />
+
+            <Button
+                android:id="@+id/btnTable8"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="..." />
+        </TableRow>
+
+    </TableLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

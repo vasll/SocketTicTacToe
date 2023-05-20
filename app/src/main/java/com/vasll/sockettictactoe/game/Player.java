@@ -5,7 +5,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
-/** Simple wrapper class for a tictactoe player object */
+/** Simple wrapper class for a TicTacToe player's socket */
 public class Player {
     private final Socket playerSocket;
     private ObjectOutputStream outputStream;

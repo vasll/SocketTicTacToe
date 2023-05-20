@@ -1,6 +1,7 @@
 package com.vasll.sockettictactoe.game;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 
 import java.util.Arrays;
 
@@ -119,7 +120,7 @@ public class Board {
         }
     }
 
-    public static char[][] jsonArrayToBoard(JSONArray boardArray){
+    public static char[][] jsonArrayToBoard(JSONArray boardArray) throws JSONException {
         char[][] charMatrix = new char[boardArray.length()][];
         for (int i = 0; i < boardArray.length(); i++) {
             JSONArray rowArray = boardArray.getJSONArray(i);
