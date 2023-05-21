@@ -1,6 +1,7 @@
 package com.vasll.sockettictactoe.game.logic;
 
-import com.vasll.sockettictactoe.game.server.ServerPlayer;
+import androidx.annotation.NonNull;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.Arrays;
@@ -12,18 +13,15 @@ public class Board {
     public final char charPlayer2;
     public final char charEmpty = ' ';
 
-    public Board(ServerPlayer player1, ServerPlayer player2) {
+    public Board(char charPlayer1, char charPlayer2) {
         this.board = new char[3][3];
         populateEmptyTable();
-
-        this.charPlayer1 = player1.charOfPlayer;
-        this.charPlayer2 = player2.charOfPlayer;
+        this.charPlayer1 = charPlayer1;
+        this.charPlayer2 = charPlayer2;
     }
 
-    /**
-     * Makes a move on the board
-     * @return true if the move is valid, false otherwise
-     */
+    /** Makes a move on the board
+      * @return true if the move is valid, false otherwise */
     public boolean makeMove(char charOfPlayer, int row, int col){
         if (row < 0 || row >= 3 || col < 0 || col >= 3 || board[row][col] != charEmpty ||
                 (charOfPlayer != charPlayer1 && charOfPlayer != charPlayer2)
@@ -35,9 +33,7 @@ public class Board {
         return true;
     }
 
-    /**
-     * Checks if one of the two players has won the game
-     */
+    /** Checks if one of the two players has won the game */
     public boolean hasPlayerWon(char charOfPlayer) {
         // Check rows
         for (int i = 0; i < 3; i++) {
@@ -64,10 +60,8 @@ public class Board {
         return false;
     }
 
-    /**
-     * Can be used to check if the game is draw.
-     * @return true if the board is full, false if the board is empty
-     */
+    /** Can be used to check if the game is draw.
+      * @return true if the board is full, false if the board is empty */
     public boolean isFull(){
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
@@ -94,7 +88,7 @@ public class Board {
     }
 
     /** @return string representation of the Board */
-    @Override
+    @NonNull @Override
     public String toString() {
         StringBuilder table = new StringBuilder();
 

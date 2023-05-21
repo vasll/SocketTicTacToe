@@ -2,13 +2,15 @@ package com.vasll.sockettictactoe.game.server;
 
 import android.util.Log;
 
+import com.vasll.sockettictactoe.game.logic.Player;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server extends Thread {
     private static final String TAG = "TicTacToe-Server";
-    private final int port;
+    public final int port;
 
     public Server(int port){
         this.port = port;
@@ -30,11 +32,10 @@ public class Server extends Thread {
             Socket socketPlayer2 = serverSocket.accept();
             Log.i(TAG, "Player2 connected!");
 
-            GameHandler gameHandler = new GameHandler(
-                new ServerPlayer(socketPlayer1, 'x'),
-                new ServerPlayer(socketPlayer2, 'o')
+            ServerGameHandler serverGameHandler = new ServerGameHandler(
+                new Player(socketPlayer1), new Player(socketPlayer2)
             );
-            gameHandler.start();
+            serverGameHandler.start();
         } catch (IOException e){
             Log.e(TAG, "Error with serverSocket");
         }

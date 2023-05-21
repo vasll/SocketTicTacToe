@@ -1,10 +1,12 @@
 package com.vasll.sockettictactoe.game.client;
 
+import com.vasll.sockettictactoe.game.listeners.TurnListener;
 import com.vasll.sockettictactoe.game.logic.Board;
 import com.vasll.sockettictactoe.game.logic.Condition;
 import com.vasll.sockettictactoe.game.logic.Move;
-import com.vasll.sockettictactoe.game.interfaces.BoardUpdateListener;
-import com.vasll.sockettictactoe.game.interfaces.ConditionListener;
+import com.vasll.sockettictactoe.game.listeners.BoardUpdateListener;
+import com.vasll.sockettictactoe.game.listeners.ConditionListener;
+import com.vasll.sockettictactoe.game.logic.Player;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,16 +20,17 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class Client extends Thread {
     private static final String TAG = "TicTacToe-Client";
-    private final int port;
+    public final int port;
     private int playerId, enemyId;
-    private int currentPlayerId;
+    private int currentTurnPlayerId;
 
-    private ClientPlayer player;
+    private Player player;
     private ClientInputHandler clientInputHandler;
     private ClientOutputHandler clientOutputHandler;
 
     private final List<BoardUpdateListener> boardUpdateListeners = new ArrayList<>();
     private final List<ConditionListener> conditionListeners = new ArrayList<>();
+    private final List<TurnListener> turnListeners = new ArrayList<>();
 
     public Client(int port) {
         this.port = port;
@@ -36,13 +39,13 @@ public class Client extends Thread {
     @Override
     public void run() {
         try(Socket socket = new Socket("localhost", port)){
-            player = new ClientPlayer(socket);
+            player = new Player(socket);
 
+            // Handshake check
             // TODO better handshake check
             JSONObject handshake = new JSONObject(
                 (String) player.getInputStream().readObject()
             );
-
             playerId = handshake.getInt("player_id");
             enemyId = handshake.getInt("enemy_id");
 
@@ -53,14 +56,6 @@ public class Client extends Thread {
         } catch (IOException | JSONException | ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-
-
-        // TODO
-        // 1. Connect to socket
-        // 2. Check for handshake and get player_id, enemy_id
-
-        // Start 1 thread for the inputStream
-        // Start 1 thread for the outputStream
     }
 
     public void addBoardUpdateListener(BoardUpdateListener boardUpdateListener){
@@ -71,12 +66,24 @@ public class Client extends Thread {
         conditionListeners.add(conditionListener);
     }
 
+    public void addTurnListener(TurnListener turnListener){
+        turnListeners.add(turnListener);
+    }
+
+    public int getPlayerId() {
+        return playerId;
+    }
+
+    public int getEnemyId() {
+        return enemyId;
+    }
+
     /** Handles the incoming messages from a TicTacToe Server */
     private class ClientInputHandler extends Thread {
-        private final ClientPlayer clientPlayer;
+        private final Player player;
 
-        public ClientInputHandler(ClientPlayer clientPlayer){
-            this.clientPlayer = clientPlayer;
+        public ClientInputHandler(Player player){
+            this.player = player;
         }
 
         @Override
@@ -84,7 +91,7 @@ public class Client extends Thread {
             try{
                 while (!Thread.currentThread().isInterrupted()) {
                     JSONObject message = new JSONObject(
-                        (String) clientPlayer.getInputStream().readObject()
+                        (String) player.getInputStream().readObject()
                     );
                     String message_type = message.getString("message_type");
 
@@ -102,9 +109,19 @@ public class Client extends Thread {
 
         /** Handles the board from the server and updates all the listeners with the new board */
         private void handleBoardMessage(JSONObject message) throws JSONException {
-            currentPlayerId = message.getInt("current_player_id");
             char[][] board = Board.jsonArrayToBoard(message.getJSONArray("board"));
+            int nextTurnPlayerId = message.getInt("current_player_id");
 
+            /* If nextTurnPlayerId is different from currentTurnPlayerId means that
+             * the turn has switched. Then we notify all the turnListeners. */
+            if(nextTurnPlayerId != currentTurnPlayerId){
+                currentTurnPlayerId = nextTurnPlayerId;
+                for(TurnListener turnListener : turnListeners){
+                    turnListener.onCurrentPlayerIdChanged(currentTurnPlayerId);
+                }
+            }
+
+            // Notify boardUpdateListeners that board has changed
             for(BoardUpdateListener boardUpdateListener : boardUpdateListeners){
                 boardUpdateListener.onBoardUpdate(board);
             }
@@ -115,6 +132,7 @@ public class Client extends Thread {
             String conditionLiteral = message.getString("condition");
             Condition condition = Condition.parse(conditionLiteral);
 
+            // Notify conditionListeners that game win condition has changed
             for(ConditionListener conditionListener : conditionListeners) {
                 conditionListener.onCondition(condition);
             }
@@ -131,11 +149,11 @@ public class Client extends Thread {
 
     /** Handles the input from the user and sends it as an output to the TicTacToe server */
     private class ClientOutputHandler extends Thread {
-        private final ClientPlayer clientPlayer;
+        private final Player player;
         private final BlockingQueue<Move> moveQueue;
 
-        public ClientOutputHandler(ClientPlayer playerSocket) {
-            this.clientPlayer = playerSocket;
+        public ClientOutputHandler(Player playerSocket) {
+            this.player = playerSocket;
             this.moveQueue = new LinkedBlockingQueue<>();
         }
 
@@ -144,8 +162,8 @@ public class Client extends Thread {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Move move = moveQueue.take();  // Wait until a move is available
-                    clientPlayer.getOutputStream().writeObject(move.toJsonMessage(playerId).toString());
-                    clientPlayer.getOutputStream().flush();
+                    player.getOutputStream().writeObject(move.toJsonMessage(playerId).toString());
+                    player.getOutputStream().flush();
                 }
             } catch (IOException | InterruptedException | JSONException e) {
                 throw new RuntimeException(e);

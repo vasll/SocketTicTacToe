@@ -1,4 +1,4 @@
-package com.vasll.sockettictactoe.game.client;
+package com.vasll.sockettictactoe.game.logic;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -6,12 +6,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 /** Wrapper class for a TicTacToe player's socket (client-side) */
-public class ClientPlayer {
+public class Player {
     private final Socket playerSocket;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
 
-    public ClientPlayer(Socket playerSocket) {
+    public Player(Socket playerSocket) {
         this.playerSocket = playerSocket;
 
         try {

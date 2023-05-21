@@ -1,4 +1,4 @@
-package com.vasll.sockettictactoe.game.interfaces;
+package com.vasll.sockettictactoe.game.listeners;
 
 import com.vasll.sockettictactoe.game.logic.Condition;
 
