@@ -1,5 +1,7 @@
 package com.vasll.sockettictactoe.game.client;
 
+import android.util.Log;
+
 import com.vasll.sockettictactoe.game.listeners.TurnListener;
 import com.vasll.sockettictactoe.game.logic.Board;
 import com.vasll.sockettictactoe.game.logic.Condition;
@@ -21,10 +23,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 public class Client extends Thread {
     private static final String TAG = "TicTacToe-Client";
     public final int port;
+    public final String ip;
     private int playerId, enemyId;
     private int currentTurnPlayerId;
-
     private Player player;
+
     private ClientInputHandler clientInputHandler;
     private ClientOutputHandler clientOutputHandler;
 
@@ -32,25 +35,29 @@ public class Client extends Thread {
     private final List<ConditionListener> conditionListeners = new ArrayList<>();
     private final List<TurnListener> turnListeners = new ArrayList<>();
 
-    public Client(int port) {
+    public Client(String ip, int port) {
         this.port = port;
+        this.ip = ip;
     }
 
     @Override
     public void run() {
-        try(Socket socket = new Socket("localhost", port)){
-            player = new Player(socket);
+        Log.i(TAG, "Running Client...");
+        try {
+            player = new Player(new Socket(ip, port));
+            Log.i(TAG, "Connection to Socket OK");
 
-            // Handshake check
-            // TODO better handshake check
+            // Handshake check // TODO better handshake check
+            Log.i(TAG, "Checking handshake... ");
             JSONObject handshake = new JSONObject(
                 (String) player.getInputStream().readObject()
             );
+            Log.i(TAG, "Received handshake: "+handshake);
             playerId = handshake.getInt("player_id");
             enemyId = handshake.getInt("enemy_id");
 
-            clientInputHandler = new ClientInputHandler(player);
-            clientOutputHandler = new ClientOutputHandler(player);
+            clientInputHandler = new ClientInputHandler();
+            clientOutputHandler = new ClientOutputHandler();
             clientInputHandler.start();
             clientOutputHandler.start();
         } catch (IOException | JSONException | ClassNotFoundException e) {
@@ -78,14 +85,12 @@ public class Client extends Thread {
         return enemyId;
     }
 
+    public void makeMove(Move move) {
+        clientOutputHandler.makeMove(move);
+    }
+
     /** Handles the incoming messages from a TicTacToe Server */
     private class ClientInputHandler extends Thread {
-        private final Player player;
-
-        public ClientInputHandler(Player player){
-            this.player = player;
-        }
-
         @Override
         public void run() {
             try{
@@ -93,6 +98,7 @@ public class Client extends Thread {
                     JSONObject message = new JSONObject(
                         (String) player.getInputStream().readObject()
                     );
+                    Log.i(TAG, "Message received: "+ message);
                     String message_type = message.getString("message_type");
 
                     switch (message_type){
@@ -103,14 +109,15 @@ public class Client extends Thread {
                     }
                 }
             } catch (JSONException | IOException | ClassNotFoundException e) {
-                throw new RuntimeException(e);
+                Log.e(TAG, "Error with ClientInputHandler");
+                e.printStackTrace();
             }
         }
 
         /** Handles the board from the server and updates all the listeners with the new board */
         private void handleBoardMessage(JSONObject message) throws JSONException {
             char[][] board = Board.jsonArrayToBoard(message.getJSONArray("board"));
-            int nextTurnPlayerId = message.getInt("current_player_id");
+            int nextTurnPlayerId = message.getInt("next_turn_player_id");
 
             /* If nextTurnPlayerId is different from currentTurnPlayerId means that
              * the turn has switched. Then we notify all the turnListeners. */
@@ -149,11 +156,9 @@ public class Client extends Thread {
 
     /** Handles the input from the user and sends it as an output to the TicTacToe server */
     private class ClientOutputHandler extends Thread {
-        private final Player player;
         private final BlockingQueue<Move> moveQueue;
 
-        public ClientOutputHandler(Player playerSocket) {
-            this.player = playerSocket;
+        public ClientOutputHandler() {
             this.moveQueue = new LinkedBlockingQueue<>();
         }
 

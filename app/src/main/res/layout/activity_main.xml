@@ -20,34 +20,42 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnStartClient"
+        android:id="@+id/btnStartClient1"
         style="@style/Widget.AppCompat.Button"
         android:layout_width="376dp"
         android:layout_height="wrap_content"
         android:padding="12sp"
-        android:text="Start client"
+        android:text="Start client 1"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@+id/btnStartClient2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.542"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <Button
+        android:id="@+id/btnMakeMove"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="376dp"
+        android:layout_height="wrap_content"
+        android:padding="12sp"
+        android:text="Make move"
         android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@+id/btnStartServer"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
-    <TextView
-        android:id="@+id/tvServerStatus"
-        android:layout_width="wrap_content"
+    <Button
+        android:id="@+id/btnStartClient2"
+        style="@style/Widget.AppCompat.Button"
+        android:layout_width="376dp"
         android:layout_height="wrap_content"
-        android:text="Server status: ..."
+        android:padding="12sp"
+        android:text="Start client 2"
         android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnStartClient"
-        app:layout_constraintStart_toStartOf="@+id/btnStartClient" />
-
-    <TextView
-        android:id="@+id/tvServerStatus2"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Client status: ..."
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/tvServerStatus"
-        app:layout_constraintStart_toStartOf="@+id/tvServerStatus" />
+        app:layout_constraintBottom_toTopOf="@+id/btnMakeMove"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.514"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TableLayout
         android:layout_width="376dp"
@@ -85,7 +93,7 @@
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <Button
                 android:id="@+id/btnTable3"
@@ -111,7 +119,7 @@
 
         <TableRow
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent">
 
             <Button
                 android:id="@+id/btnTable6"
@@ -136,5 +144,29 @@
         </TableRow>
 
     </TableLayout>
+
+    <EditText
+        android:id="@+id/etPort"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:ems="16"
+        android:hint="Port"
+        android:inputType="number"
+        app:layout_constraintBottom_toTopOf="@+id/btnStartClient1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <EditText
+        android:id="@+id/etIP"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:ems="16"
+        android:hint="IP"
+        android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@+id/etPort"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.058"
+        app:layout_constraintStart_toStartOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

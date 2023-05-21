@@ -11,7 +11,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 public class ServerGameHandler extends Thread {
-    private static final String TAG = "TicTacToe-ServerGameHandler";
+    private static final String TAG = "ServerGameHandler";
     private static final char PLAYER_1_CHAR = 'x';
     private static final char PLAYER_2_CHAR = 'o';
 
@@ -28,19 +28,14 @@ public class ServerGameHandler extends Thread {
 
     @Override
     public void run() {
-        try {
-            Log.i(TAG, "Starting ServerGameHandler");
-            broadcastHandshake(); // Send information about the game
-            broadcastBoard(); // Send initial board state to all players
+        Log.i(TAG, "Starting ServerGameHandler");
 
-            // Handle the moves from clients from another Thread
-            Thread threadPlayer1 = new Thread(new PlayerIOHandler(player1, PLAYER_1_CHAR));
-            threadPlayer1.start();
-            Thread threadPlayer2 = new Thread(new PlayerIOHandler(player2, PLAYER_2_CHAR));
-            threadPlayer2.start();
-        } catch (IOException | JSONException e) {
-            throw new RuntimeException(e);
-        }
+        // Handle the moves from clients from another Thread
+        Thread threadPlayer1 = new Thread(new PlayerIOHandler(player1, PLAYER_1_CHAR));
+        threadPlayer1.start();
+
+        Thread threadPlayer2 = new Thread(new PlayerIOHandler(player2, PLAYER_2_CHAR));
+        threadPlayer2.start();
     }
 
     /** 'board' Message
@@ -50,9 +45,9 @@ public class ServerGameHandler extends Thread {
         JSONObject json = new JSONObject()
                 .put("message_type", "board")
                 .put("board", board.toJsonArray())
-                .put("current_turn_player_id", currentTurnPlayerId);
+                .put("next_turn_player_id", currentTurnPlayerId);
 
-        Log.i(TAG, json.toString());
+        Log.i(TAG, "sending message: "+json.toString());
         player1.getOutputStream().writeObject(json.toString());
         player2.getOutputStream().writeObject(json.toString());
     }
@@ -64,9 +59,9 @@ public class ServerGameHandler extends Thread {
         JSONObject json = new JSONObject()
                 .put("message_type", "board")
                 .put("board", board.toJsonArray())
-                .put("current_turn_player_id", currentTurnPlayerId);
+                .put("next_turn_player_id", currentTurnPlayerId);
 
-        Log.i(TAG, json.toString());
+        Log.i(TAG, "sending message: "+json.toString());
         p.getOutputStream().writeObject(json.toString());
     }
 
@@ -82,6 +77,9 @@ public class ServerGameHandler extends Thread {
             .put("message_type", "condition")
             .put("condition", Condition.LOSE.literal());
 
+        Log.i(TAG, "sending messages: "+winJson.toString());
+        Log.i(TAG, "sending messages: "+loseJson.toString());
+
         winner.getOutputStream().writeObject(winJson.toString());
         loser.getOutputStream().writeObject(loseJson.toString());
     }
@@ -90,12 +88,13 @@ public class ServerGameHandler extends Thread {
      * Sends the win/lose condition to each of the players  */
     private void broadcastDrawCondition() throws IOException, JSONException {
         Log.i(TAG, "broadcastDrawCondition()");
-        JSONObject winJson = new JSONObject()
+        JSONObject drawJson = new JSONObject()
             .put("message_type", "condition")
             .put("condition", Condition.DRAW.literal());
 
-        player1.getOutputStream().writeObject(winJson.toString());
-        player2.getOutputStream().writeObject(winJson.toString());
+        Log.i(TAG, "sending message: "+drawJson.toString());
+        player1.getOutputStream().writeObject(drawJson.toString());
+        player2.getOutputStream().writeObject(drawJson.toString());
     }
 
     /** 'handshake' Message
@@ -108,13 +107,17 @@ public class ServerGameHandler extends Thread {
                 .put("player_id", 1)
                 .put("enemy_id", 2)
                 .put("starting_player_id", currentTurnPlayerId);
-        player1.getOutputStream().writeObject(jsonPlayer1.toString());
 
         JSONObject jsonPlayer2 = new JSONObject()   // Message for player2
                 .put("message_type", "handshake")
                 .put("player_id", 2)
                 .put("enemy_id", 1)
                 .put("starting_player_id", currentTurnPlayerId);
+
+        Log.i(TAG, "sending messages: "+jsonPlayer1.toString());
+        Log.i(TAG, "sending messages: "+jsonPlayer2.toString());
+
+        player1.getOutputStream().writeObject(jsonPlayer1.toString());
         player2.getOutputStream().writeObject(jsonPlayer2.toString());
     }
 
@@ -129,8 +132,8 @@ public class ServerGameHandler extends Thread {
         }
     }
 
-    private class PlayerIOHandler implements Runnable {
-        private static final String TAG = "PlayerIOHandler";
+    private class PlayerIOHandler extends Thread {
+        private static final String TAG = ServerGameHandler.TAG+"-PlayerIOHandler";
         private final Player player;
         private final char charOfPlayer;
 
@@ -142,9 +145,15 @@ public class ServerGameHandler extends Thread {
         @Override
         public void run() {
             Log.i(TAG, "Starting PlayerIOHandler");
-            while(true){
-                try {
-                    JSONObject message = new JSONObject((String) player.getInputStream().readObject());
+            try {
+                broadcastHandshake(); // Send information about the game
+                broadcastBoard(); // Send initial board state to all players
+
+                while(true){
+                    Log.i(TAG, "Waiting for message...");
+                    JSONObject message = new JSONObject(
+                        (String) player.getInputStream().readObject()
+                    );
                     int player_id = message.getInt("player_id");
                     int row = message.getInt("row");
                     int col = message.getInt("col");
@@ -172,9 +181,10 @@ public class ServerGameHandler extends Thread {
 
                     currentTurnPlayerId = getNextTurnPlayerId(player_id);
                     broadcastBoard();
-                } catch (IOException | ClassNotFoundException | JSONException e) {
-                    throw new RuntimeException(e);
                 }
+            } catch (IOException | ClassNotFoundException | JSONException e) {
+                Log.e(TAG, "Error with PlayerIOHandler");
+                throw new RuntimeException(e);
             }
         }
     }
