@@ -1,20 +1,18 @@
-package com.vasll.sockettictactoe.game;
+package com.vasll.sockettictactoe.game.logic;
 
+import com.vasll.sockettictactoe.game.server.ServerPlayer;
 import org.json.JSONArray;
 import org.json.JSONException;
-
 import java.util.Arrays;
 
-/**
- * Represents a TicTacToe game Board
- */
+/** Represents a TicTacToe game Board, only used server-side for builtin validation */
 public class Board {
     private char[][] board;
     public final char charPlayer1;
     public final char charPlayer2;
     public final char charEmpty = ' ';
 
-    public Board(Player player1, Player player2) {
+    public Board(ServerPlayer player1, ServerPlayer player2) {
         this.board = new char[3][3];
         populateEmptyTable();
 
@@ -26,8 +24,7 @@ public class Board {
      * Makes a move on the board
      * @return true if the move is valid, false otherwise
      */
-    public boolean makeMove(Player player, int row, int col){
-        char charOfPlayer = player.charOfPlayer;
+    public boolean makeMove(char charOfPlayer, int row, int col){
         if (row < 0 || row >= 3 || col < 0 || col >= 3 || board[row][col] != charEmpty ||
                 (charOfPlayer != charPlayer1 && charOfPlayer != charPlayer2)
         ) {
@@ -41,9 +38,7 @@ public class Board {
     /**
      * Checks if one of the two players has won the game
      */
-    public boolean hasPlayerWon(Player player) {
-        char charOfPlayer = player.charOfPlayer;
-
+    public boolean hasPlayerWon(char charOfPlayer) {
         // Check rows
         for (int i = 0; i < 3; i++) {
             if (board[i][0] == charOfPlayer && board[i][1] == charOfPlayer && board[i][2] == charOfPlayer) {
