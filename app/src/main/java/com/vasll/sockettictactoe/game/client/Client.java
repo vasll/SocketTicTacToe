@@ -1,15 +1,15 @@
 package com.vasll.sockettictactoe.game.client;
 
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
-
 import com.vasll.sockettictactoe.game.listeners.TurnListener;
 import com.vasll.sockettictactoe.game.logic.Board;
 import com.vasll.sockettictactoe.game.logic.Condition;
 import com.vasll.sockettictactoe.game.logic.Move;
 import com.vasll.sockettictactoe.game.listeners.BoardUpdateListener;
 import com.vasll.sockettictactoe.game.listeners.ConditionListener;
-import com.vasll.sockettictactoe.game.logic.Player;
-
+import com.vasll.sockettictactoe.game.logic.PlayerSocket;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
@@ -25,8 +25,8 @@ public class Client extends Thread {
     public final int port;
     public final String ip;
     private int playerId, enemyId;
-    private int currentTurnPlayerId;
-    private Player player;
+    private int currentPlayerId;
+    private PlayerSocket playerSocket;
 
     private ClientInputHandler clientInputHandler;
     private ClientOutputHandler clientOutputHandler;
@@ -44,13 +44,13 @@ public class Client extends Thread {
     public void run() {
         Log.i(TAG, "Running Client...");
         try {
-            player = new Player(new Socket(ip, port));
+            playerSocket = new PlayerSocket(new Socket(ip, port));
             Log.i(TAG, "Connection to Socket OK");
 
             // Handshake check // TODO better handshake check
             Log.i(TAG, "Checking handshake... ");
             JSONObject handshake = new JSONObject(
-                (String) player.getInputStream().readObject()
+                (String) playerSocket.getInputStream().readObject()
             );
             Log.i(TAG, "Received handshake: "+handshake);
             playerId = handshake.getInt("player_id");
@@ -65,7 +65,7 @@ public class Client extends Thread {
         }
     }
 
-    public void addBoardUpdateListener(BoardUpdateListener boardUpdateListener){
+    public void addBoardUiUpdateListener(BoardUpdateListener boardUpdateListener){
         boardUpdateListeners.add(boardUpdateListener);
     }
 
@@ -96,7 +96,7 @@ public class Client extends Thread {
             try{
                 while (!Thread.currentThread().isInterrupted()) {
                     JSONObject message = new JSONObject(
-                        (String) player.getInputStream().readObject()
+                        (String) playerSocket.getInputStream().readObject()
                     );
                     Log.i(TAG, "Message received: "+ message);
                     String message_type = message.getString("message_type");
@@ -121,16 +121,17 @@ public class Client extends Thread {
 
             /* If nextTurnPlayerId is different from currentTurnPlayerId means that
              * the turn has switched. Then we notify all the turnListeners. */
-            if(nextTurnPlayerId != currentTurnPlayerId){
-                currentTurnPlayerId = nextTurnPlayerId;
+            if(nextTurnPlayerId != currentPlayerId){
+                currentPlayerId = nextTurnPlayerId;
                 for(TurnListener turnListener : turnListeners){
-                    turnListener.onCurrentPlayerIdChanged(currentTurnPlayerId);
+                    turnListener.onCurrentPlayerIdChanged(currentPlayerId);
                 }
             }
 
-            // Notify boardUpdateListeners that board has changed
+            // Notify boardUpdateListeners and update the UI on the main thread
             for(BoardUpdateListener boardUpdateListener : boardUpdateListeners){
-                boardUpdateListener.onBoardUpdate(board);
+                Handler handler = new Handler(Looper.getMainLooper());
+                handler.post(() -> boardUpdateListener.onUiBoardUpdate(board));
             }
         }
 
@@ -167,8 +168,8 @@ public class Client extends Thread {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Move move = moveQueue.take();  // Wait until a move is available
-                    player.getOutputStream().writeObject(move.toJsonMessage(playerId).toString());
-                    player.getOutputStream().flush();
+                    playerSocket.getOutputStream().writeObject(move.toJsonMessage(playerId).toString());
+                    playerSocket.getOutputStream().flush();
                 }
             } catch (IOException | InterruptedException | JSONException e) {
                 throw new RuntimeException(e);

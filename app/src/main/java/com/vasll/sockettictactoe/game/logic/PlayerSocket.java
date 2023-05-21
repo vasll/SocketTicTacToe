@@ -6,12 +6,12 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 
 /** Wrapper class for a TicTacToe player's socket (client-side) */
-public class Player {
+public class PlayerSocket {
     private final Socket playerSocket;
     private ObjectOutputStream outputStream;
     private ObjectInputStream inputStream;
 
-    public Player(Socket playerSocket) {
+    public PlayerSocket(Socket playerSocket) {
         this.playerSocket = playerSocket;
 
         try {

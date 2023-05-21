@@ -2,7 +2,7 @@ package com.vasll.sockettictactoe.game.server;
 
 import android.util.Log;
 
-import com.vasll.sockettictactoe.game.logic.Player;
+import com.vasll.sockettictactoe.game.logic.PlayerSocket;
 import com.vasll.sockettictactoe.game.logic.Board;
 import com.vasll.sockettictactoe.game.logic.Condition;
 
@@ -15,13 +15,13 @@ public class ServerGameHandler extends Thread {
     private static final char PLAYER_1_CHAR = 'x';
     private static final char PLAYER_2_CHAR = 'o';
 
-    private final Player player1, player2;
+    private final PlayerSocket playerSocket1, playerSocket2;
     private final Board board;
     private int currentTurnPlayerId;    // Keeps the id of the user that has the turn
 
-    public ServerGameHandler(Player player1, Player player2){
-        this.player1 = player1;
-        this.player2 = player2;
+    public ServerGameHandler(PlayerSocket playerSocket1, PlayerSocket playerSocket2){
+        this.playerSocket1 = playerSocket1;
+        this.playerSocket2 = playerSocket2;
         this.board = new Board(PLAYER_1_CHAR, PLAYER_2_CHAR);
         this.currentTurnPlayerId = 1; // First player to play is player1
     }
@@ -31,10 +31,10 @@ public class ServerGameHandler extends Thread {
         Log.i(TAG, "Starting ServerGameHandler");
 
         // Handle the moves from clients from another Thread
-        Thread threadPlayer1 = new Thread(new PlayerIOHandler(player1, PLAYER_1_CHAR));
+        Thread threadPlayer1 = new Thread(new PlayerIOHandler(playerSocket1, PLAYER_1_CHAR));
         threadPlayer1.start();
 
-        Thread threadPlayer2 = new Thread(new PlayerIOHandler(player2, PLAYER_2_CHAR));
+        Thread threadPlayer2 = new Thread(new PlayerIOHandler(playerSocket2, PLAYER_2_CHAR));
         threadPlayer2.start();
     }
 
@@ -48,13 +48,13 @@ public class ServerGameHandler extends Thread {
                 .put("next_turn_player_id", currentTurnPlayerId);
 
         Log.i(TAG, "sending message: "+json.toString());
-        player1.getOutputStream().writeObject(json.toString());
-        player2.getOutputStream().writeObject(json.toString());
+        playerSocket1.getOutputStream().writeObject(json.toString());
+        playerSocket2.getOutputStream().writeObject(json.toString());
     }
 
     /** 'board' Message
      * Sends the current board as a JSON */
-    private void sendBoard(Player p) throws IOException, JSONException {
+    private void sendBoard(PlayerSocket p) throws IOException, JSONException {
         Log.i(TAG, "sendBoard()");
         JSONObject json = new JSONObject()
                 .put("message_type", "board")
@@ -67,7 +67,7 @@ public class ServerGameHandler extends Thread {
 
     /** 'condition' Message
      * Sends the win/lose condition to each of the players */
-    private void sendWinCondition(Player winner, Player loser) throws IOException, JSONException {
+    private void sendWinCondition(PlayerSocket winner, PlayerSocket loser) throws IOException, JSONException {
         Log.i(TAG, "sendWinCondition()");
         JSONObject winJson = new JSONObject()
             .put("message_type", "condition")
@@ -93,8 +93,8 @@ public class ServerGameHandler extends Thread {
             .put("condition", Condition.DRAW.literal());
 
         Log.i(TAG, "sending message: "+drawJson.toString());
-        player1.getOutputStream().writeObject(drawJson.toString());
-        player2.getOutputStream().writeObject(drawJson.toString());
+        playerSocket1.getOutputStream().writeObject(drawJson.toString());
+        playerSocket2.getOutputStream().writeObject(drawJson.toString());
     }
 
     /** 'handshake' Message
@@ -117,8 +117,8 @@ public class ServerGameHandler extends Thread {
         Log.i(TAG, "sending messages: "+jsonPlayer1.toString());
         Log.i(TAG, "sending messages: "+jsonPlayer2.toString());
 
-        player1.getOutputStream().writeObject(jsonPlayer1.toString());
-        player2.getOutputStream().writeObject(jsonPlayer2.toString());
+        playerSocket1.getOutputStream().writeObject(jsonPlayer1.toString());
+        playerSocket2.getOutputStream().writeObject(jsonPlayer2.toString());
     }
 
     /** This is stupid and will break if one day player ids are different from 1 and 2 */
@@ -134,11 +134,11 @@ public class ServerGameHandler extends Thread {
 
     private class PlayerIOHandler extends Thread {
         private static final String TAG = ServerGameHandler.TAG+"-PlayerIOHandler";
-        private final Player player;
+        private final PlayerSocket playerSocket;
         private final char charOfPlayer;
 
-        public PlayerIOHandler(Player player, char charOfPlayer) {
-            this.player = player;
+        public PlayerIOHandler(PlayerSocket playerSocket, char charOfPlayer) {
+            this.playerSocket = playerSocket;
             this.charOfPlayer = charOfPlayer;
         }
 
@@ -152,7 +152,7 @@ public class ServerGameHandler extends Thread {
                 while(true){
                     Log.i(TAG, "Waiting for message...");
                     JSONObject message = new JSONObject(
-                        (String) player.getInputStream().readObject()
+                        (String) playerSocket.getInputStream().readObject()
                     );
                     int player_id = message.getInt("player_id");
                     int row = message.getInt("row");
@@ -166,7 +166,7 @@ public class ServerGameHandler extends Thread {
                     boolean isMoveValid = board.makeMove(charOfPlayer, row, col);
                     if(!isMoveValid){
                         Log.i(TAG, "Player "+player_id+" invalid move detected");
-                        sendBoard(player);  // Re-send the board to the player
+                        sendBoard(playerSocket);  // Re-send the board to the player
                         continue;
                     }
                     boolean hasPlayerWon = board.hasPlayerWon(charOfPlayer);
@@ -175,8 +175,12 @@ public class ServerGameHandler extends Thread {
                             broadcastDrawCondition();
                             break;
                         }
-                    }else {
-                        // TODO Send win condition
+                    } else {
+                        if(currentTurnPlayerId==1) {
+                            sendWinCondition(playerSocket1, playerSocket2);
+                        } else if (currentTurnPlayerId==2) {
+                            sendWinCondition(playerSocket2, playerSocket1);
+                        }
                     }
 
                     currentTurnPlayerId = getNextTurnPlayerId(player_id);

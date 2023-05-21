@@ -2,7 +2,7 @@ package com.vasll.sockettictactoe.game.server;
 
 import android.util.Log;
 
-import com.vasll.sockettictactoe.game.logic.Player;
+import com.vasll.sockettictactoe.game.logic.PlayerSocket;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -48,11 +48,14 @@ public class Server extends Thread {
             Log.i(TAG, "Player2 connected!");
 
             ServerGameHandler serverGameHandler = new ServerGameHandler(
-                new Player(socketPlayer1), new Player(socketPlayer2)
+                new PlayerSocket(socketPlayer1), new PlayerSocket(socketPlayer2)
             );
             serverGameHandler.start();
+            serverGameHandler.join();
         } catch (IOException e){
             Log.e(TAG, "Error with serverSocket");
+        } catch (InterruptedException ignored) {
+
         }
     }
 }

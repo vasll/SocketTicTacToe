@@ -66,6 +66,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <TableRow
+            android:id="@+id/tr0"
             android:layout_width="fill_parent"
             android:layout_height="match_parent">
 
@@ -92,6 +93,7 @@
         </TableRow>
 
         <TableRow
+            android:id="@+id/tr1"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
@@ -118,6 +120,7 @@
         </TableRow>
 
         <TableRow
+            android:id="@+id/tr2"
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
