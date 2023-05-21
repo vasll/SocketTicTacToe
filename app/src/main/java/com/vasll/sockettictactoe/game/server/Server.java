@@ -11,6 +11,7 @@ import java.net.Socket;
 public class Server extends Thread {
     private static final String TAG = "TicTacToe-Server";
     public final int port;
+    private ServerSocket serverSocket;
 
     public Server(int port){
         this.port = port;
@@ -18,10 +19,24 @@ public class Server extends Thread {
 
     @Override
     public void run() {
-        Log.i(TAG, "Starting on port "+port+"...");
+        Log.i(TAG, "Starting server on port "+port+"...");
 
-        try(ServerSocket serverSocket = new ServerSocket(port)){
+        try {
+            serverSocket = new ServerSocket(port);
             Log.i(TAG, "Started successfully");
+
+            // In an infinite loop
+            // 1. Accept all connections
+            // 2. Wait for the 'info' or 'connect' message_type, if no message
+            // is received in 5 seconds, disconnect from the socket.
+
+            // 'info' message
+            // 1. Return the JSON containing server information and disconnect from the socket
+
+            // 'connect' message
+            // 1. Save the socket into an ArrayList
+            // 2. If the ArrayList is now full start the ServerGameHandler
+            // 3. If not wait for another player to join
 
             Log.i(TAG, "Waiting for Player1...");
             Socket socketPlayer1 = serverSocket.accept();
