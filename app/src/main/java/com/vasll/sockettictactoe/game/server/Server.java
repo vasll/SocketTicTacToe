@@ -14,6 +14,7 @@ public class Server extends Thread {
     private static final String TAG = "Server";
     public final int port;
     private ServerSocket serverSocket;
+    private DiscoveryServer discoveryServer;
 
     public Server(int port){
         this.port = port;
@@ -27,6 +28,10 @@ public class Server extends Thread {
             serverSocket = new ServerSocket(port);
             Log.i(TAG, "Connection to ServerSocket OK");
 
+            // Start the DiscoveryServer
+            discoveryServer = new DiscoveryServer(port);
+            discoveryServer.start();
+
             Log.i(TAG, "Waiting for Player1...");
             Socket socketPlayer1 = serverSocket.accept();
             Log.i(TAG, "Player1 connected!");
@@ -39,7 +44,10 @@ public class Server extends Thread {
                 new PlayerSocket(socketPlayer1), new PlayerSocket(socketPlayer2)
             );
             serverGameHandler.start();
+
+            // Join serverGameHandler and wait for game to finish
             serverGameHandler.join();
+            discoveryServer.interrupt();
         } catch (IOException e){
             Log.e(TAG, "IOException", e);
         } catch (InterruptedException e) {
