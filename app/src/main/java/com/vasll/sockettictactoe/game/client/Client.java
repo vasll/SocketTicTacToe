@@ -48,7 +48,7 @@ public class Client extends Thread {
             // Handshake check // TODO better handshake check
             Log.i(TAG, "Checking handshake... ");
             JSONObject handshake = new JSONObject(
-                (String) playerSocket.getInputStream().readUTF()
+                (String) playerSocket.getDataInputStream().readUTF()
             );
             Log.i(TAG, "Received handshake: "+handshake);
             playerId = handshake.getInt("player_id");
@@ -94,7 +94,7 @@ public class Client extends Thread {
             try{
                 while (!Thread.currentThread().isInterrupted()) {
                     JSONObject message = new JSONObject(
-                        (String) playerSocket.getInputStream().readUTF()
+                        (String) playerSocket.getDataInputStream().readUTF()
                     );
                     Log.i(TAG, "Message received: "+ message);
                     String message_type = message.getString("message_type");
@@ -165,8 +165,8 @@ public class Client extends Thread {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Move move = moveQueue.take();  // Wait until a move is available
-                    playerSocket.getOutputStream().writeUTF(move.toJsonMessage(playerId).toString());
-                    playerSocket.getOutputStream().flush();
+                    playerSocket.getDataOutputStream().writeUTF(move.toJsonMessage(playerId).toString());
+                    playerSocket.getDataOutputStream().flush();
                 }
             } catch (IOException | InterruptedException | JSONException e) {
                 throw new RuntimeException(e);

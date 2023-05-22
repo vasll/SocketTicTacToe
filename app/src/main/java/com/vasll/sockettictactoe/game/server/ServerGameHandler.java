@@ -50,8 +50,8 @@ public class ServerGameHandler extends Thread {
                 .put("next_turn_player_id", currentTurnPlayerId);
 
         Log.i(TAG, "sending message: "+json.toString());
-        playerSocket1.getOutputStream().writeUTF(json.toString());
-        playerSocket2.getOutputStream().writeUTF(json.toString());
+        playerSocket1.getDataOutputStream().writeUTF(json.toString());
+        playerSocket2.getDataOutputStream().writeUTF(json.toString());
     }
 
     /** 'board' Message
@@ -64,7 +64,7 @@ public class ServerGameHandler extends Thread {
                 .put("next_turn_player_id", currentTurnPlayerId);
 
         Log.i(TAG, "sending message: "+json.toString());
-        p.getOutputStream().writeUTF(json.toString());
+        p.getDataOutputStream().writeUTF(json.toString());
     }
 
     /** 'condition' Message
@@ -82,8 +82,8 @@ public class ServerGameHandler extends Thread {
         Log.i(TAG, "sending messages: "+winJson.toString());
         Log.i(TAG, "sending messages: "+loseJson.toString());
 
-        winner.getOutputStream().writeUTF(winJson.toString());
-        loser.getOutputStream().writeUTF(loseJson.toString());
+        winner.getDataOutputStream().writeUTF(winJson.toString());
+        loser.getDataOutputStream().writeUTF(loseJson.toString());
     }
 
     /** 'condition' Message
@@ -95,8 +95,8 @@ public class ServerGameHandler extends Thread {
             .put("condition", Condition.DRAW.literal());
 
         Log.i(TAG, "sending message: "+drawJson.toString());
-        playerSocket1.getOutputStream().writeUTF(drawJson.toString());
-        playerSocket2.getOutputStream().writeUTF(drawJson.toString());
+        playerSocket1.getDataOutputStream().writeUTF(drawJson.toString());
+        playerSocket2.getDataOutputStream().writeUTF(drawJson.toString());
     }
 
     /** 'handshake' Message
@@ -119,10 +119,10 @@ public class ServerGameHandler extends Thread {
         Log.i(TAG, "sending messages: "+jsonPlayer1.toString());
         Log.i(TAG, "sending messages: "+jsonPlayer2.toString());
 
-        playerSocket1.getOutputStream().writeUTF(jsonPlayer1.toString());
-        playerSocket1.getOutputStream().flush();
-        playerSocket2.getOutputStream().writeUTF(jsonPlayer2.toString());
-        playerSocket2.getOutputStream().flush();
+        playerSocket1.getDataOutputStream().writeUTF(jsonPlayer1.toString());
+        playerSocket1.getDataOutputStream().flush();
+        playerSocket2.getDataOutputStream().writeUTF(jsonPlayer2.toString());
+        playerSocket2.getDataOutputStream().flush();
     }
 
     /** This is stupid and will break if one day player ids are different from 1 and 2 */
@@ -158,7 +158,7 @@ public class ServerGameHandler extends Thread {
 
                     Log.i(TAG, "Waiting for message...");
                     JSONObject message = new JSONObject(
-                        (String) playerSocket.getInputStream().readUTF()
+                        (String) playerSocket.getDataInputStream().readUTF()
                     );
                     // Unpack message
                     Log.i(TAG, "Got message: "+message);

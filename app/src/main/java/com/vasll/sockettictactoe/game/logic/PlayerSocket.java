@@ -26,11 +26,11 @@ public class PlayerSocket {
         return playerSocket;
     }
 
-    public DataOutputStream getOutputStream() {
+    public DataOutputStream getDataOutputStream() {
         return outputStream;
     }
 
-    public DataInputStream getInputStream() {
+    public DataInputStream getDataInputStream() {
         return inputStream;
     }
 }
