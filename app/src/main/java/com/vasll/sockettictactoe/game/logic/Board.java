@@ -15,10 +15,11 @@ public class Board {
 
     public Board(char charPlayer1, char charPlayer2) {
         this.board = new char[3][3];
-        populateEmptyTable();
+        this.clear();  // Set the board to ' ' chars
         this.charPlayer1 = charPlayer1;
         this.charPlayer2 = charPlayer2;
     }
+
 
     /** Makes a move on the board
       * @return true if the move is valid, false otherwise */
@@ -103,7 +104,7 @@ public class Board {
         return table.toString();
     }
 
-    private void populateEmptyTable(){
+    public void clear(){
         for (int i = 0; i < 3; i++) {
             Arrays.fill(board[i], charEmpty);
         }

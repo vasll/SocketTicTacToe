@@ -17,13 +17,15 @@ public class ServerGameHandler extends Thread {
 
     private final PlayerSocket playerSocket1, playerSocket2;
     private final Board board;
-    private int currentTurnPlayerId;    // Keeps the id of the user that has the turn
+    private int currentTurnPlayerId;  // Keeps the id of the user that has the turn
+    private int currentRound;  // keeps track of the current round
 
     public ServerGameHandler(PlayerSocket playerSocket1, PlayerSocket playerSocket2){
         this.playerSocket1 = playerSocket1;
         this.playerSocket2 = playerSocket2;
         this.board = new Board(PLAYER_1_CHAR, PLAYER_2_CHAR);
         this.currentTurnPlayerId = 1; // First player to play is player1
+        currentRound = 0;
     }
 
     @Override
@@ -150,10 +152,14 @@ public class ServerGameHandler extends Thread {
                 broadcastBoard(); // Send initial board state to all players
 
                 while(true){
+                    // TODO implement round logic, max round count (i.e max round: 3)
+
                     Log.i(TAG, "Waiting for message...");
                     JSONObject message = new JSONObject(
                         (String) playerSocket.getInputStream().readObject()
                     );
+                    // Unpack message
+                    Log.i(TAG, "Got message: "+message);
                     int player_id = message.getInt("player_id");
                     int row = message.getInt("row");
                     int col = message.getInt("col");
@@ -162,7 +168,6 @@ public class ServerGameHandler extends Thread {
                     if (player_id != currentTurnPlayerId) { continue; }
 
                     // Make the move and check if it is valid, if it isn't go back at the top of the loop
-                    Log.i(TAG, "Player "+player_id+" making move on ("+row+", "+col+")");
                     boolean isMoveValid = board.makeMove(charOfPlayer, row, col);
                     if(!isMoveValid){
                         Log.i(TAG, "Player "+player_id+" invalid move detected");
@@ -173,7 +178,10 @@ public class ServerGameHandler extends Thread {
                     if(!hasPlayerWon){
                         if(board.isFull()){
                             broadcastDrawCondition();
-                            break;
+                            currentRound += 1;
+                            board.clear();
+                            broadcastBoard();
+                            continue;
                         }
                     } else {
                         if(currentTurnPlayerId==1) {
@@ -181,6 +189,10 @@ public class ServerGameHandler extends Thread {
                         } else if (currentTurnPlayerId==2) {
                             sendWinCondition(playerSocket2, playerSocket1);
                         }
+                        currentRound += 1;
+                        board.clear();
+                        broadcastBoard();
+                        continue;
                     }
 
                     currentTurnPlayerId = getNextTurnPlayerId(player_id);
