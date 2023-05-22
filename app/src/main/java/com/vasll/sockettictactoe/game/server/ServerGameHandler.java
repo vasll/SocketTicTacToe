@@ -51,7 +51,9 @@ public class ServerGameHandler extends Thread {
 
         Log.i(TAG, "sending message: "+json.toString());
         playerSocket1.getDataOutputStream().writeUTF(json.toString());
+        playerSocket1.getDataOutputStream().flush();
         playerSocket2.getDataOutputStream().writeUTF(json.toString());
+        playerSocket2.getDataOutputStream().flush();
     }
 
     /** 'board' Message
@@ -65,6 +67,7 @@ public class ServerGameHandler extends Thread {
 
         Log.i(TAG, "sending message: "+json.toString());
         p.getDataOutputStream().writeUTF(json.toString());
+        p.getDataOutputStream().flush();
     }
 
     /** 'condition' Message
@@ -83,7 +86,9 @@ public class ServerGameHandler extends Thread {
         Log.i(TAG, "sending messages: "+loseJson.toString());
 
         winner.getDataOutputStream().writeUTF(winJson.toString());
+        winner.getDataOutputStream().flush();
         loser.getDataOutputStream().writeUTF(loseJson.toString());
+        loser.getDataOutputStream().flush();
     }
 
     /** 'condition' Message
@@ -96,7 +101,9 @@ public class ServerGameHandler extends Thread {
 
         Log.i(TAG, "sending message: "+drawJson.toString());
         playerSocket1.getDataOutputStream().writeUTF(drawJson.toString());
+        playerSocket1.getDataOutputStream().flush();
         playerSocket2.getDataOutputStream().writeUTF(drawJson.toString());
+        playerSocket2.getDataOutputStream().flush();
     }
 
     /** 'handshake' Message
