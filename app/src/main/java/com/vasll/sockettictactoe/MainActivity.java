@@ -4,21 +4,30 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.Toast;
 
 import com.vasll.sockettictactoe.databinding.ActivityMainBinding;
 import com.vasll.sockettictactoe.game.client.Client;
+import com.vasll.sockettictactoe.game.listeners.RoundListener;
 import com.vasll.sockettictactoe.game.logic.Move;
 import com.vasll.sockettictactoe.game.server.Server;
+
+import org.json.JSONException;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
+    private final static String TAG = "MainActivity";
     private ActivityMainBinding binding;
     private Server gameServer;
     private Client gameClient1, gameClient2;
     private ArrayList<ArrayList<Button>> btnGridClient1, btnGridClient2;
+
+    private int currentRoundCount = 0;
+    private int player1Score = 0;
+    private int player2Score = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,14 +63,24 @@ public class MainActivity extends AppCompatActivity {
                 updateBoard(board, btnGridClient1);
             });
         });
-        gameClient1.addConditionListener(condition -> {
-            MainActivity.this.runOnUiThread(() -> {
-                switch(condition){
-                    case WIN -> Toast.makeText(this, "Client1 won", Toast.LENGTH_SHORT).show();
-                    case LOSE -> Toast.makeText(this, "Client1 lost", Toast.LENGTH_SHORT).show();
-                    case DRAW -> Toast.makeText(this, "Draw!", Toast.LENGTH_SHORT).show();
-                }
-            });
+
+        gameClient1.addRoundListener((player1Score, player2Score, currentRoundCount) -> {
+            this.currentRoundCount = currentRoundCount;
+            this.player1Score = player1Score;
+            this.player2Score = player2Score;
+            runOnUiThread(() ->
+                Toast.makeText(this, "Round "+currentRoundCount, Toast.LENGTH_SHORT).show()
+            );
+        });
+
+        gameClient1.addGameListener((player1Score, player2Score) -> {
+            this.player1Score = player1Score;
+            this.player2Score = player2Score;
+            Log.i(TAG, "GAME HAS ENDED!!!!!!");
+            runOnUiThread(() ->
+                Toast.makeText(this, "Game has ended!", Toast.LENGTH_SHORT).show()
+            );
+            // TODO somehow close the resources
         });
         gameClient1.start();
         bindListenersToClient(gameClient1, btnGridClient1);

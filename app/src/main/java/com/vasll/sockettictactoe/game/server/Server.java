@@ -41,7 +41,8 @@ public class Server extends Thread {
             Log.i(TAG, "Player2 connected!");
 
             ServerGameHandler serverGameHandler = new ServerGameHandler(
-                new PlayerSocket(socketPlayer1), new PlayerSocket(socketPlayer2)
+                new PlayerSocket(socketPlayer1), new PlayerSocket(socketPlayer2),
+                3 // By default a game is 3 rounds
             );
             serverGameHandler.start();
 

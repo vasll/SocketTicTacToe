@@ -1,12 +1,13 @@
 package com.vasll.sockettictactoe.game.client;
 
 import android.util.Log;
+
+import com.vasll.sockettictactoe.game.listeners.GameListener;
+import com.vasll.sockettictactoe.game.listeners.RoundListener;
 import com.vasll.sockettictactoe.game.listeners.TurnListener;
 import com.vasll.sockettictactoe.game.logic.Board;
-import com.vasll.sockettictactoe.game.logic.Condition;
 import com.vasll.sockettictactoe.game.logic.Move;
-import com.vasll.sockettictactoe.game.listeners.BoardUpdateListener;
-import com.vasll.sockettictactoe.game.listeners.ConditionListener;
+import com.vasll.sockettictactoe.game.listeners.BoardListener;
 import com.vasll.sockettictactoe.game.logic.PlayerSocket;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -29,9 +30,10 @@ public class Client extends Thread {
     private ClientInputHandler clientInputHandler;
     private ClientOutputHandler clientOutputHandler;
 
-    private final List<BoardUpdateListener> boardUpdateListeners = new ArrayList<>();
-    private final List<ConditionListener> conditionListeners = new ArrayList<>();
+    private final List<BoardListener> boardListeners = new ArrayList<>();
     private final List<TurnListener> turnListeners = new ArrayList<>();
+    private final List<RoundListener> roundListeners = new ArrayList<>();
+    private final List<GameListener> gameListeners = new ArrayList<>();
 
     public Client(String ip, int port) {
         this.port = port;
@@ -65,28 +67,34 @@ public class Client extends Thread {
         }
     }
 
-    public void addBoardUpdateListener(BoardUpdateListener boardUpdateListener){
-        boardUpdateListeners.add(boardUpdateListener);
+    public void makeMove(Move move) {
+        clientOutputHandler.makeMove(move);
     }
 
-    public void addConditionListener(ConditionListener conditionListener){
-        conditionListeners.add(conditionListener);
+    // Listeners
+    public void addBoardUpdateListener(BoardListener boardListener) {
+        boardListeners.add(boardListener);
     }
 
-    public void addTurnListener(TurnListener turnListener){
+    public void addTurnListener(TurnListener turnListener) {
         turnListeners.add(turnListener);
     }
 
+    public void addRoundListener(RoundListener roundListener) {
+        roundListeners.add(roundListener);
+    }
+
+    public void addGameListener(GameListener gameListener) {
+        gameListeners.add(gameListener);
+    }
+
+    // Other getters
     public int getPlayerId() {
         return playerId;
     }
 
     public int getEnemyId() {
         return enemyId;
-    }
-
-    public void makeMove(Move move) {
-        clientOutputHandler.makeMove(move);
     }
 
     /** Handles the incoming messages from a TicTacToe Server */
@@ -106,8 +114,9 @@ public class Client extends Thread {
                     String message_type = json.getString("message_type");
                     switch (message_type){
                         case "board" -> handleBoardMessage(json);
-                        case "condition" -> handleConditionMessage(json);
                         case "disconnect" -> handleDisconnectMessage(json);
+                        case "end_round" -> handleEndRoundMessage(json);
+                        case "end_game"-> handleEndGameMessage(json);
                         default -> { /* TODO implement */ }
                     }
                 }
@@ -132,20 +141,28 @@ public class Client extends Thread {
                 }
             }
 
-            // Notify boardUpdateListeners and update the UI on the main thread
-            for(BoardUpdateListener boardUpdateListener : boardUpdateListeners){
-                boardUpdateListener.onBoardUpdate(board);
+            // Notify boardUpdateListeners
+            for(BoardListener boardListener : boardListeners){
+                boardListener.onBoardUpdate(board);
             }
         }
 
-        /** Handles the condition message that is sent from the server and updates all the listeners */
-        private void handleConditionMessage(JSONObject message) throws JSONException {
-            String conditionLiteral = message.getString("condition");
-            Condition condition = Condition.parse(conditionLiteral);
+        private void handleEndRoundMessage(JSONObject message) throws JSONException {
+            int player1Score = message.getInt("player_1_score");
+            int player2Score = message.getInt("player_2_score");
+            int currentRoundCount = message.getInt("current_round_count");
 
-            // Notify conditionListeners that game win condition has changed
-            for(ConditionListener conditionListener : conditionListeners) {
-                conditionListener.onCondition(condition);
+            for(RoundListener roundListener : roundListeners){
+                roundListener.onNextRound(player1Score, player2Score, currentRoundCount);
+            }
+        }
+
+        private void handleEndGameMessage(JSONObject message) throws JSONException {
+            int player1Score = message.getInt("player_1_score");
+            int player2Score = message.getInt("player_2_score");
+
+            for(GameListener gameListener : gameListeners){
+                gameListener.onGameEnd(player1Score, player2Score);
             }
         }
 
