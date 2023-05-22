@@ -1,7 +1,5 @@
 package com.vasll.sockettictactoe.game.client;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import com.vasll.sockettictactoe.game.listeners.TurnListener;
 import com.vasll.sockettictactoe.game.logic.Board;
@@ -65,7 +63,7 @@ public class Client extends Thread {
         }
     }
 
-    public void addBoardUiUpdateListener(BoardUpdateListener boardUpdateListener){
+    public void addBoardUpdateListener(BoardUpdateListener boardUpdateListener){
         boardUpdateListeners.add(boardUpdateListener);
     }
 
@@ -130,8 +128,7 @@ public class Client extends Thread {
 
             // Notify boardUpdateListeners and update the UI on the main thread
             for(BoardUpdateListener boardUpdateListener : boardUpdateListeners){
-                Handler handler = new Handler(Looper.getMainLooper());
-                handler.post(() -> boardUpdateListener.onUiBoardUpdate(board));
+                boardUpdateListener.onBoardUpdate(board);
             }
         }
 

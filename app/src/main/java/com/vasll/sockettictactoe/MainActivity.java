@@ -8,7 +8,6 @@ import android.widget.Toast;
 
 import com.vasll.sockettictactoe.databinding.ActivityMainBinding;
 import com.vasll.sockettictactoe.game.client.Client;
-import com.vasll.sockettictactoe.game.logic.Condition;
 import com.vasll.sockettictactoe.game.logic.Move;
 import com.vasll.sockettictactoe.game.server.Server;
 
@@ -46,7 +45,11 @@ public class MainActivity extends AppCompatActivity {
         int port = Integer.parseInt(binding.etPort.getText().toString());
         String ip = binding.etIP.getText().toString();
         gameClient1 = new Client(ip, port);
-        gameClient1.addBoardUiUpdateListener(board -> updateBoard(board, btnGridClient1));
+        gameClient1.addBoardUpdateListener(board -> {
+            MainActivity.this.runOnUiThread(() -> {
+                updateBoard(board, btnGridClient1);
+            });
+        });
         gameClient1.addConditionListener(condition -> {
             MainActivity.this.runOnUiThread(() -> {
                 switch(condition){
@@ -64,7 +67,11 @@ public class MainActivity extends AppCompatActivity {
         int port = Integer.parseInt(binding.etPort.getText().toString());
         String ip = binding.etIP.getText().toString();
         gameClient2 = new Client(ip, port);
-        gameClient2.addBoardUiUpdateListener(board -> updateBoard(board, btnGridClient2));
+        gameClient2.addBoardUpdateListener(board -> {
+            MainActivity.this.runOnUiThread(() -> {
+                updateBoard(board, btnGridClient2);
+            });
+        });
         gameClient2.start();
         bindListenersToClient(gameClient2, btnGridClient2);
     }
