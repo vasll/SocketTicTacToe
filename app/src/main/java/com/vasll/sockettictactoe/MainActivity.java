@@ -2,6 +2,7 @@ package com.vasll.sockettictactoe;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.Toast;
@@ -33,6 +34,9 @@ public class MainActivity extends AppCompatActivity {
         binding.btnStartServer.setOnClickListener(v -> onBtnStartServer());
         binding.btnStartClient1.setOnClickListener(v -> onBtnStartClient1());
         binding.btnStartClient2.setOnClickListener(v -> onBtnStartClient2());
+        binding.btnOpenLobbyActivity.setOnClickListener(v -> {
+            startActivity(new Intent(MainActivity.this, LobbyActivity.class));
+        });
     }
 
     private void onBtnStartServer() {

@@ -8,7 +8,7 @@ import java.net.DatagramSocket;
 
 public class DiscoveryServer extends Thread {
     private static final String TAG = "DiscoveryServer";
-    private static final String DISCOVERY_MESSAGE = "SOCKET-TIC-TAC-TOE-GAME";
+    public static final String DISCOVERY_MESSAGE = "SOCKET-TIC-TAC-TOE-GAME";
     public final int port;
 
     public DiscoveryServer(int port) {
