@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 
 import com.vasll.sockettictactoe.R;
 import com.vasll.sockettictactoe.databinding.ActivityLobbyBinding;
@@ -14,22 +15,25 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LobbyActivity extends AppCompatActivity {
     private ActivityLobbyBinding binding;
     private static final String TAG = "LobbyActivity";
     private static final int responseBufferSize = 1024;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = ActivityLobbyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // TODO udp discovery on port 8888
+        binding.btnDiscoverLobbies.setOnClickListener(v ->
+            new Thread(this::discoverLobbies).start()
+        );
     }
 
-    // TODO pasted in from another project
+    // TODO This is just some bad temporary code
     private void discoverLobbies(){
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setBroadcast(true);
@@ -50,6 +54,14 @@ public class LobbyActivity extends AppCompatActivity {
 
             try {
                 socket.receive(receivePacket);
+
+                // TODO move this in other function
+                LobbyActivity.this.runOnUiThread(()->{
+                    TextView tv = new TextView(this);
+                    tv.setText("Ip: "+receivePacket.getAddress().toString());
+                    binding.linearLayout.addView(tv);
+                });
+
                 String responseMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
                 Log.d(TAG, "Received response: " + responseMessage);
             } catch (IOException e) {
