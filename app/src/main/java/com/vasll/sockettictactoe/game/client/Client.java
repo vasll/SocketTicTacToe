@@ -19,7 +19,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 
 public class Client extends Thread {
-    private static final String TAG = "TicTacToe-Client";
+    private static final String TAG = "Client";
     public final int port;
     public final String ip;
     private int playerId, enemyId;
@@ -40,23 +40,25 @@ public class Client extends Thread {
 
     @Override
     public void run() {
-        Log.i(TAG, "Running Client...");
         try {
+            Log.i(TAG, "Connecting Socket Client to "+ip+":"+port+"...");
             playerSocket = new PlayerSocket(new Socket(ip, port));
             Log.i(TAG, "Connection to Socket OK");
 
-            // Handshake check // TODO better handshake check
-            Log.i(TAG, "Checking handshake... ");
+            // Handshake check
+            Log.d(TAG, "Waiting for handshake...");
             JSONObject handshake = new JSONObject(
                 (String) playerSocket.getDataInputStream().readUTF()
             );
-            Log.i(TAG, "Received handshake: "+handshake);
+            // TODO check if handshake is good or not
+            Log.d(TAG, "Received handshake: "+handshake);
             playerId = handshake.getInt("player_id");
             enemyId = handshake.getInt("enemy_id");
 
             clientInputHandler = new ClientInputHandler();
-            clientOutputHandler = new ClientOutputHandler();
             clientInputHandler.start();
+
+            clientOutputHandler = new ClientOutputHandler();
             clientOutputHandler.start();
         } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
@@ -89,26 +91,30 @@ public class Client extends Thread {
 
     /** Handles the incoming messages from a TicTacToe Server */
     private class ClientInputHandler extends Thread {
+        private static final String TAG = "ClientInputHandler";
+
         @Override
         public void run() {
             try{
                 while (!Thread.currentThread().isInterrupted()) {
-                    JSONObject message = new JSONObject(
-                        (String) playerSocket.getDataInputStream().readUTF()
-                    );
-                    Log.i(TAG, "Message received: "+ message);
-                    String message_type = message.getString("message_type");
+                    String rawMessage = playerSocket.getDataInputStream().readUTF();
+                    Log.d(TAG, "Message received: "+rawMessage);
 
+                    JSONObject json = new JSONObject(rawMessage);
+                    Log.d(TAG, "Message received as JSONObject: "+json);
+
+                    String message_type = json.getString("message_type");
                     switch (message_type){
-                        case "board" -> handleBoardMessage(message);
-                        case "condition" -> handleConditionMessage(message);
-                        case "disconnect" -> handleDisconnectMessage(message);
+                        case "board" -> handleBoardMessage(json);
+                        case "condition" -> handleConditionMessage(json);
+                        case "disconnect" -> handleDisconnectMessage(json);
                         default -> { /* TODO implement */ }
                     }
                 }
-            } catch (JSONException | IOException e) {
-                Log.e(TAG, "Error with ClientInputHandler");
-                e.printStackTrace();
+            } catch (IOException e) {
+                Log.e(TAG, "IOException", e);
+            } catch (JSONException e) {
+                Log.e(TAG, "JSONException", e);
             }
         }
 
@@ -146,39 +152,33 @@ public class Client extends Thread {
         private void handleDisconnectMessage(JSONObject message) throws JSONException {
             // TODO implement
         }
-
-        public void stopHandler(){
-            this.interrupt();
-        }
     }
 
     /** Handles the input from the user and sends it as an output to the TicTacToe server */
     private class ClientOutputHandler extends Thread {
-        private final BlockingQueue<Move> moveQueue;
-
-        public ClientOutputHandler() {
-            this.moveQueue = new LinkedBlockingQueue<>();
-        }
+        private final BlockingQueue<Move> moveQueue = new LinkedBlockingQueue<>();;
 
         @Override
         public void run() {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Move move = moveQueue.take();  // Wait until a move is available
-                    playerSocket.getDataOutputStream().writeUTF(move.toJsonMessage(playerId).toString());
+                    playerSocket.getDataOutputStream().writeUTF(
+                        move.toJsonMessage(playerId).toString()
+                    );
                     playerSocket.getDataOutputStream().flush();
                 }
-            } catch (IOException | InterruptedException | JSONException e) {
-                throw new RuntimeException(e);
+            } catch (IOException e) {
+                Log.e(TAG, "IOException", e);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "InterruptedException", e);
+            } catch (JSONException e) {
+                Log.e(TAG, "JSONException", e);
             }
         }
 
         public void makeMove(Move move) {
             moveQueue.add(move);
-        }
-
-        public void stopHandler(){
-            this.interrupt();
         }
     }
 }

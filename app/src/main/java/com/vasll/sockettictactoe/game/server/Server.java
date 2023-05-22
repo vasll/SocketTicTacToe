@@ -8,8 +8,10 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
+/**To be used as a local Server
+ * It waits for two players to connect and starts a ServerGameHandler to manage the game */
 public class Server extends Thread {
-    private static final String TAG = "TicTacToe-Server";
+    private static final String TAG = "Server";
     public final int port;
     private ServerSocket serverSocket;
 
@@ -17,31 +19,17 @@ public class Server extends Thread {
         this.port = port;
     }
 
+    // TODO implement UDP server for lobby system
     @Override
     public void run() {
-        Log.i(TAG, "Starting server on port "+port+"...");
-
         try {
+            Log.i(TAG, "Starting ServerSocket on port "+port+"...");
             serverSocket = new ServerSocket(port);
-            Log.i(TAG, "Started successfully");
-
-            // In an infinite loop
-            // 1. Accept all connections
-            // 2. Wait for the 'info' or 'connect' message_type, if no message
-            // is received in 5 seconds, disconnect from the socket.
-
-            // 'info' message
-            // 1. Return the JSON containing server information and disconnect from the socket
-
-            // 'connect' message
-            // 1. Save the socket into an ArrayList
-            // 2. If the ArrayList is now full start the ServerGameHandler
-            // 3. If not wait for another player to join
+            Log.i(TAG, "Connection to ServerSocket OK");
 
             Log.i(TAG, "Waiting for Player1...");
             Socket socketPlayer1 = serverSocket.accept();
             Log.i(TAG, "Player1 connected!");
-
 
             Log.i(TAG, "Waiting for Player2...");
             Socket socketPlayer2 = serverSocket.accept();
@@ -53,9 +41,9 @@ public class Server extends Thread {
             serverGameHandler.start();
             serverGameHandler.join();
         } catch (IOException e){
-            Log.e(TAG, "Error with serverSocket");
-        } catch (InterruptedException ignored) {
-
+            Log.e(TAG, "IOException", e);
+        } catch (InterruptedException e) {
+            Log.e(TAG, "InterruptedException", e);
         }
     }
 }

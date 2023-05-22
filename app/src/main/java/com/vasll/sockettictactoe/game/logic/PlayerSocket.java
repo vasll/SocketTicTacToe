@@ -1,11 +1,13 @@
 package com.vasll.sockettictactoe.game.logic;
 
+import android.util.Log;
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-/** Wrapper class for a TicTacToe player's socket (client-side) */
+/** Wrapper class for a TicTacToe player's socket */
 public class PlayerSocket {
     private final Socket playerSocket;
     private DataOutputStream outputStream;
@@ -13,12 +15,11 @@ public class PlayerSocket {
 
     public PlayerSocket(Socket playerSocket) {
         this.playerSocket = playerSocket;
-
         try {
             this.outputStream = new DataOutputStream(playerSocket.getOutputStream());
             this.inputStream = new DataInputStream(playerSocket.getInputStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            Log.e("PlayerSocket", "Exception while creating DataOutput/InputStream(s)", e);
         }
     }
 
