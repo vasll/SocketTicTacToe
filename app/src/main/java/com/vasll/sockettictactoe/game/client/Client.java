@@ -48,7 +48,7 @@ public class Client extends Thread {
             // Handshake check // TODO better handshake check
             Log.i(TAG, "Checking handshake... ");
             JSONObject handshake = new JSONObject(
-                (String) playerSocket.getInputStream().readObject()
+                (String) playerSocket.getInputStream().readUTF()
             );
             Log.i(TAG, "Received handshake: "+handshake);
             playerId = handshake.getInt("player_id");
@@ -58,7 +58,7 @@ public class Client extends Thread {
             clientOutputHandler = new ClientOutputHandler();
             clientInputHandler.start();
             clientOutputHandler.start();
-        } catch (IOException | JSONException | ClassNotFoundException e) {
+        } catch (IOException | JSONException e) {
             throw new RuntimeException(e);
         }
     }
@@ -94,7 +94,7 @@ public class Client extends Thread {
             try{
                 while (!Thread.currentThread().isInterrupted()) {
                     JSONObject message = new JSONObject(
-                        (String) playerSocket.getInputStream().readObject()
+                        (String) playerSocket.getInputStream().readUTF()
                     );
                     Log.i(TAG, "Message received: "+ message);
                     String message_type = message.getString("message_type");
@@ -106,7 +106,7 @@ public class Client extends Thread {
                         default -> { /* TODO implement */ }
                     }
                 }
-            } catch (JSONException | IOException | ClassNotFoundException e) {
+            } catch (JSONException | IOException e) {
                 Log.e(TAG, "Error with ClientInputHandler");
                 e.printStackTrace();
             }
@@ -165,7 +165,7 @@ public class Client extends Thread {
             try {
                 while (!Thread.currentThread().isInterrupted()) {
                     Move move = moveQueue.take();  // Wait until a move is available
-                    playerSocket.getOutputStream().writeObject(move.toJsonMessage(playerId).toString());
+                    playerSocket.getOutputStream().writeUTF(move.toJsonMessage(playerId).toString());
                     playerSocket.getOutputStream().flush();
                 }
             } catch (IOException | InterruptedException | JSONException e) {
