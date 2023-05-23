@@ -3,6 +3,10 @@ package com.vasll.sockettictactoe.game.logic;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * This exists because in GameClient.ClientOutputHandler I use a BlockingQueue to handle the moves
+ * and the Type has to be an Object.
+ */
 public class Move {
     private final int row;
     private final int col;

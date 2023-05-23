@@ -8,25 +8,33 @@ import com.vasll.sockettictactoe.game.logic.Board;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.io.IOException;
+import java.net.ServerSocket;
 
-public class ServerGameHandler extends Thread {
-    private static final String TAG = "ServerGameHandler";
-    private static final char PLAYER_1_CHAR = 'x';
-    private static final char PLAYER_2_CHAR = 'o';
+/**
+ * GameServer for the SocketTicTacToe Android game
+ * Waits for a connection from 2 sockets (players) and when the connection is established
+ * the game will start.
+ */
+public class GameServer extends Thread {
+    private static final String TAG = "GameServer";
+    private static final char PLAYER_1_CHAR = 'X';
+    private static final char PLAYER_2_CHAR = 'O';
+    private ServerSocket serverSocket;
+    private DiscoveryServer discoveryServer;
 
-    private final int maxRounds;   // Count of how many rounds the game should last
-    private final PlayerSocket playerSocket1, playerSocket2;
+    private final int maxRounds;   // How many rounds the game should last
+    private PlayerSocket socketPlayer1, socketPlayer2;
     private final Board board;
     private int currentTurnPlayerId;  // Keeps the id of the user that has the turn
     private int player1Score = 0, player2Score = 0;
     private int currentRound = 0;
+    public final int port;
 
     private PlayerIOHandler player1IOHandler;
     private PlayerIOHandler player2IOHandler;
 
-    public ServerGameHandler(PlayerSocket playerSocket1, PlayerSocket playerSocket2, int maxRounds) {
-        this.playerSocket1 = playerSocket1;
-        this.playerSocket2 = playerSocket2;
+    public GameServer(int port, int maxRounds) {
+        this.port = port;
         this.board = new Board(PLAYER_1_CHAR, PLAYER_2_CHAR);
         this.maxRounds = maxRounds;
         this.currentTurnPlayerId = 1; // First player to play is player1
@@ -34,8 +42,23 @@ public class ServerGameHandler extends Thread {
 
     @Override
     public void run() {
-        Log.i(TAG, "Starting ServerGameHandler...");
         try {
+            Log.i(TAG, "Starting ServerSocket on port "+port+"...");
+            serverSocket = new ServerSocket(port);
+            Log.i(TAG, "Connection to ServerSocket OK");
+
+            // Start the DiscoveryServer
+            discoveryServer = new DiscoveryServer(port);
+            discoveryServer.start();
+
+            Log.i(TAG, "Waiting for Player1...");
+            socketPlayer1 = new PlayerSocket(serverSocket.accept());
+            Log.i(TAG, "Player1 connected!");
+
+            Log.i(TAG, "Waiting for Player2...");
+            socketPlayer2 = new PlayerSocket(serverSocket.accept());
+            Log.i(TAG, "Player2 connected!");
+
             broadcastHandshake(); // Send information about the game
             broadcastBoard(); // Send initial board state to all players
         } catch (IOException e) {
@@ -45,9 +68,9 @@ public class ServerGameHandler extends Thread {
         }
 
         // Handle the moves from clients from other Threads
-        player1IOHandler = new PlayerIOHandler(playerSocket1, PLAYER_1_CHAR);
+        player1IOHandler = new PlayerIOHandler(socketPlayer1, PLAYER_1_CHAR);
         player1IOHandler.start();
-        player2IOHandler = new PlayerIOHandler(playerSocket2, PLAYER_2_CHAR);
+        player2IOHandler = new PlayerIOHandler(socketPlayer2, PLAYER_2_CHAR);
         player2IOHandler.start();
 
         Log.i(TAG, "ServerGameHandler OK");
@@ -68,12 +91,12 @@ public class ServerGameHandler extends Thread {
                 .put("max_rounds", maxRounds);
 
         Log.d(TAG, "broadcastHandshake() - sending message: "+jsonPlayer1);
-        playerSocket1.getDataOutputStream().writeUTF(jsonPlayer1.toString());
-        playerSocket1.getDataOutputStream().flush();
+        socketPlayer1.getDataOutputStream().writeUTF(jsonPlayer1.toString());
+        socketPlayer1.getDataOutputStream().flush();
 
         Log.d(TAG, "broadcastHandshake() - sending message: "+jsonPlayer2);
-        playerSocket2.getDataOutputStream().writeUTF(jsonPlayer2.toString());
-        playerSocket2.getDataOutputStream().flush();
+        socketPlayer2.getDataOutputStream().writeUTF(jsonPlayer2.toString());
+        socketPlayer2.getDataOutputStream().flush();
     }
 
     /** 'board' Message
@@ -85,10 +108,10 @@ public class ServerGameHandler extends Thread {
             .put("next_turn_player_id", currentTurnPlayerId);
 
         Log.d(TAG, "broadcastBoard() - Sending message (broadcast): "+json);
-        playerSocket1.getDataOutputStream().writeUTF(json.toString());
-        playerSocket1.getDataOutputStream().flush();
-        playerSocket2.getDataOutputStream().writeUTF(json.toString());
-        playerSocket2.getDataOutputStream().flush();
+        socketPlayer1.getDataOutputStream().writeUTF(json.toString());
+        socketPlayer1.getDataOutputStream().flush();
+        socketPlayer2.getDataOutputStream().writeUTF(json.toString());
+        socketPlayer2.getDataOutputStream().flush();
     }
 
     /** 'board' Message
@@ -114,32 +137,27 @@ public class ServerGameHandler extends Thread {
             .put("current_round_count", currentRound);
 
         Log.d(TAG, "broadcastEndRound() - Sending message (broadcast): "+json);
-        playerSocket1.getDataOutputStream().writeUTF(json.toString());
-        playerSocket1.getDataOutputStream().flush();
-        playerSocket2.getDataOutputStream().writeUTF(json.toString());
-        playerSocket2.getDataOutputStream().flush();
+        socketPlayer1.getDataOutputStream().writeUTF(json.toString());
+        socketPlayer1.getDataOutputStream().flush();
+        socketPlayer2.getDataOutputStream().writeUTF(json.toString());
+        socketPlayer2.getDataOutputStream().flush();
     }
 
     public boolean isGameFinished() {
         return currentRound == maxRounds;
     }
 
-    private void broadcastEndGameAndExit() throws JSONException, IOException {
+    private void broadcastEndGame() throws JSONException, IOException {
         JSONObject json = new JSONObject()
             .put("message_type", "end_game")
             .put("player_1_score", player1Score)
             .put("player_2_score", player2Score);
 
         Log.d(TAG, "broadcastEndGameAndExit() - Sending message (broadcast): "+json);
-        playerSocket1.getDataOutputStream().writeUTF(json.toString());
-        playerSocket1.getDataOutputStream().flush();
-        playerSocket2.getDataOutputStream().writeUTF(json.toString());
-        playerSocket2.getDataOutputStream().flush();
-
-        Log.d(TAG, "broadcastEndGameAndExit() - Stopping playerIOHandlers and ServerGameHandler");
-        player1IOHandler.interrupt();
-        player2IOHandler.interrupt();
-        this.interrupt();
+        socketPlayer1.getDataOutputStream().writeUTF(json.toString());
+        socketPlayer1.getDataOutputStream().flush();
+        socketPlayer2.getDataOutputStream().writeUTF(json.toString());
+        socketPlayer2.getDataOutputStream().flush();
     }
 
 
@@ -154,6 +172,17 @@ public class ServerGameHandler extends Thread {
         }
     }
 
+    private void cleanUp() {
+        // TODO IMPORTANT: close DiscoveryServer
+        discoveryServer.close();
+        try {
+            if(!serverSocket.isClosed()){
+                serverSocket.close();
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /** Handles the IO of a PlayerSocket server-side */
     private class PlayerIOHandler extends Thread {
@@ -202,8 +231,9 @@ public class ServerGameHandler extends Thread {
                             currentRound += 1;
                             if(isGameFinished()) {
                                 broadcastBoard();
-                                broadcastEndGameAndExit();
-                                break;
+                                broadcastEndGame();
+                                cleanUp();
+                                return;
                             }
                             board.clear();
                             broadcastEndRound();
@@ -217,8 +247,9 @@ public class ServerGameHandler extends Thread {
                         currentRound += 1;
                         if(isGameFinished()) {
                             broadcastBoard();
-                            broadcastEndGameAndExit();
-                            break;
+                            broadcastEndGame();
+                            cleanUp();
+                            return;
                         }
                         board.clear();
                         broadcastEndRound();

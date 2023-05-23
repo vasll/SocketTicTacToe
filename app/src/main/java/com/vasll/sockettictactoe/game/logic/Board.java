@@ -6,7 +6,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import java.util.Arrays;
 
-/** Represents a TicTacToe game Board, only used server-side for builtin validation */
+/** Represents a TicTacToe game Board, makes validation easier */
 public class Board {
     private char[][] board;
     public final char charPlayer1;
@@ -19,7 +19,6 @@ public class Board {
         this.charPlayer1 = charPlayer1;
         this.charPlayer2 = charPlayer2;
     }
-
 
     /** Makes a move on the board
       * @return true if the move is valid, false otherwise */

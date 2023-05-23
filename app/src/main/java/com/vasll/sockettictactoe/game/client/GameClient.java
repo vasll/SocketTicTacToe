@@ -4,7 +4,6 @@ import android.util.Log;
 
 import com.vasll.sockettictactoe.game.listeners.GameListener;
 import com.vasll.sockettictactoe.game.listeners.RoundListener;
-import com.vasll.sockettictactoe.game.listeners.TurnListener;
 import com.vasll.sockettictactoe.game.logic.Board;
 import com.vasll.sockettictactoe.game.logic.Move;
 import com.vasll.sockettictactoe.game.listeners.BoardListener;
@@ -19,23 +18,21 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 
-public class Client extends Thread {
-    private static final String TAG = "Client";
+public class GameClient extends Thread {
+    private static final String TAG = "GameClient";
     public final int port;
     public final String ip;
     private int playerId, enemyId;
-    private int currentPlayerId;
     private PlayerSocket playerSocket;
 
     private ClientInputHandler clientInputHandler;
     private ClientOutputHandler clientOutputHandler;
 
     private final List<BoardListener> boardListeners = new ArrayList<>();
-    private final List<TurnListener> turnListeners = new ArrayList<>();
     private final List<RoundListener> roundListeners = new ArrayList<>();
     private final List<GameListener> gameListeners = new ArrayList<>();
 
-    public Client(String ip, int port) {
+    public GameClient(String ip, int port) {
         this.port = port;
         this.ip = ip;
     }
@@ -71,13 +68,16 @@ public class Client extends Thread {
         clientOutputHandler.makeMove(move);
     }
 
+    private void cleanUp() {
+        Log.d(TAG, "Cleaning up Client resources and exiting...");
+        clientInputHandler.interrupt();
+        clientOutputHandler.interrupt();
+        this.interrupt();
+    }
+
     // Listeners
     public void addBoardUpdateListener(BoardListener boardListener) {
         boardListeners.add(boardListener);
-    }
-
-    public void addTurnListener(TurnListener turnListener) {
-        turnListeners.add(turnListener);
     }
 
     public void addRoundListener(RoundListener roundListener) {
@@ -116,8 +116,11 @@ public class Client extends Thread {
                         case "board" -> handleBoardMessage(json);
                         case "disconnect" -> handleDisconnectMessage(json);
                         case "end_round" -> handleEndRoundMessage(json);
-                        case "end_game"-> handleEndGameMessage(json);
-                        default -> { /* TODO implement */ }
+                        case "end_game"-> {
+                            handleEndGameMessage(json);
+                            cleanUp();
+                            return;
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -132,18 +135,9 @@ public class Client extends Thread {
             char[][] board = Board.jsonArrayToBoard(message.getJSONArray("board"));
             int nextTurnPlayerId = message.getInt("next_turn_player_id");
 
-            /* If nextTurnPlayerId is different from currentTurnPlayerId means that
-             * the turn has switched. Then we notify all the turnListeners. */
-            if(nextTurnPlayerId != currentPlayerId){
-                currentPlayerId = nextTurnPlayerId;
-                for(TurnListener turnListener : turnListeners){
-                    turnListener.onCurrentPlayerIdChanged(currentPlayerId);
-                }
-            }
-
             // Notify boardUpdateListeners
             for(BoardListener boardListener : boardListeners){
-                boardListener.onBoardUpdate(board);
+                boardListener.onBoardUpdate(board, nextTurnPlayerId);
             }
         }
 
@@ -188,7 +182,7 @@ public class Client extends Thread {
             } catch (IOException e) {
                 Log.e(TAG, "IOException", e);
             } catch (InterruptedException e) {
-                Log.e(TAG, "InterruptedException", e);
+                Log.d(TAG, "Got Thread interrupt");
             } catch (JSONException e) {
                 Log.e(TAG, "JSONException", e);
             }

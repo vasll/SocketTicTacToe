@@ -1,5 +1,7 @@
 package com.vasll.sockettictactoe;
 
+import static java.lang.Thread.sleep;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
@@ -9,20 +11,17 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import com.vasll.sockettictactoe.databinding.ActivityMainBinding;
-import com.vasll.sockettictactoe.game.client.Client;
-import com.vasll.sockettictactoe.game.listeners.RoundListener;
+import com.vasll.sockettictactoe.game.client.GameClient;
 import com.vasll.sockettictactoe.game.logic.Move;
-import com.vasll.sockettictactoe.game.server.Server;
-
-import org.json.JSONException;
+import com.vasll.sockettictactoe.game.server.GameServer;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
     private final static String TAG = "MainActivity";
     private ActivityMainBinding binding;
-    private Server gameServer;
-    private Client gameClient1, gameClient2;
+    private GameServer gameServer;
+    private GameClient gameClient1, gameClient2;
     private ArrayList<ArrayList<Button>> btnGridClient1, btnGridClient2;
 
     private int currentRoundCount = 0;
@@ -46,19 +45,31 @@ public class MainActivity extends AppCompatActivity {
         binding.btnOpenLobbyActivity.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, LobbyActivity.class));
         });
+
+        new Thread(() -> {
+            try {
+                while(true){
+                    Log.d(TAG, "Active thread count: "+Thread.activeCount());
+                    sleep(1000);
+                }
+
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }).start();
     }
 
     private void onBtnStartServer() {
         int port = Integer.parseInt(binding.etPort.getText().toString());
-        gameServer = new Server(port);
+        gameServer = new GameServer(port, 1);
         gameServer.start();
     }
 
     private void onBtnStartClient1() {
         int port = Integer.parseInt(binding.etPort.getText().toString());
         String ip = binding.etIP.getText().toString();
-        gameClient1 = new Client(ip, port);
-        gameClient1.addBoardUpdateListener(board -> {
+        gameClient1 = new GameClient(ip, port);
+        gameClient1.addBoardUpdateListener((board, nextTurnPlayerId) -> {
             MainActivity.this.runOnUiThread(() -> {
                 updateBoard(board, btnGridClient1);
             });
@@ -76,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
         gameClient1.addGameListener((player1Score, player2Score) -> {
             this.player1Score = player1Score;
             this.player2Score = player2Score;
-            Log.i(TAG, "GAME HAS ENDED!!!!!!");
+            Log.i(TAG, "The game has ended!");
             runOnUiThread(() ->
                 Toast.makeText(this, "Game has ended!", Toast.LENGTH_SHORT).show()
             );
@@ -89,8 +100,8 @@ public class MainActivity extends AppCompatActivity {
     private void onBtnStartClient2() {
         int port = Integer.parseInt(binding.etPort.getText().toString());
         String ip = binding.etIP.getText().toString();
-        gameClient2 = new Client(ip, port);
-        gameClient2.addBoardUpdateListener(board -> {
+        gameClient2 = new GameClient(ip, port);
+        gameClient2.addBoardUpdateListener((board, nextTurnPlayerId) -> {
             MainActivity.this.runOnUiThread(() -> {
                 updateBoard(board, btnGridClient2);
             });
@@ -151,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
 
     /* Other boilerplate yes */
     private void bindListenersToClient(
-        Client gameClient, ArrayList<ArrayList<Button>> btnUiGrid
+            GameClient gameClient, ArrayList<ArrayList<Button>> btnUiGrid
     ) {
         for(int row=0; row<3; row++){
             for(int col=0; col<3; col++){
