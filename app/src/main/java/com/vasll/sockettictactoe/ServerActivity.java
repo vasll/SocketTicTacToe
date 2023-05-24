@@ -20,6 +20,7 @@ public class ServerActivity extends AppCompatActivity {
     }
 
     private void onStartGame() {
-
+        // TODO implement
+        // 1. start the GameActivity by passing the port, round count and source activity
     }
 }

@@ -18,6 +18,7 @@ public class LobbyActivity extends AppCompatActivity {
     private ActivityLobbyBinding binding;
     private static final String TAG = "LobbyActivity";
     private static final int responseBufferSize = 1024;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
