@@ -54,6 +54,8 @@ public class GameClient extends Thread {
             playerId = handshake.getInt("player_id");
             enemyId = handshake.getInt("enemy_id");
 
+            // TODO rename handshake to game_start and notify listeners
+
             clientInputHandler = new ClientInputHandler();
             clientInputHandler.start();
 

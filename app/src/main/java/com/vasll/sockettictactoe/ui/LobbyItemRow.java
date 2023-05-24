@@ -41,4 +41,8 @@ public class LobbyItemRow extends ConstraintLayout {
     public void setIpAddress(String ipAddress) {
         tvIpAddress.setText(ipAddress);
     }
+
+    public void setOnClickBtnJoinLobbyListener(OnClickListener clickListener) {
+        btnJoinLobby.setOnClickListener(clickListener);
+    }
 }

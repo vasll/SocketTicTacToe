@@ -33,18 +33,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void onJoinGame() {
         startActivity(new Intent(MainActivity.this, LobbyActivity.class));
-
-        // TODO implement
-        // 1. Open the LobbyActivity
-        // 2. From the LobbyActivity, find games and make the user able to join a game
-        // 3. When the user joins, open a GameActivity
     }
 
     private void onCreateGame() {
-        // TODO implement
-        // 1. Open the ServerActivity
-        // 2. Make the user set the GameServer settings and redirect to the GameActivity
-        // 3. Open the GameActivity, start the GameServer by getting the settings
-        //    from the ServerActivity and join it.
+        startActivity(new Intent(MainActivity.this, ServerActivity.class));
     }
 }

@@ -22,9 +22,6 @@
             android:name=".ServerActivity"
             android:exported="false" />
         <activity
-            android:name=".TestActivity"
-            android:exported="false" />
-        <activity
             android:name=".LobbyActivity"
             android:exported="false" />
         <activity

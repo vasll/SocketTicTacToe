@@ -128,7 +128,7 @@ public class GameServer extends Thread {
     }
 
     /** 'end_round' Message
-     * TODO description */
+     * Signals that the current round has ended */
     private void broadcastEndRound() throws JSONException, IOException {
         JSONObject json = new JSONObject()
             .put("message_type", "end_round")
@@ -201,7 +201,6 @@ public class GameServer extends Thread {
                 Log.i(TAG, "PlayerIOHandler started");
 
                 while (!Thread.currentThread().isInterrupted()) {
-                    // TODO implement round logic, max round count (i.e max round: 3)
                     Log.d(TAG, "Waiting for message from Client...");
                     String message = playerSocket.getDataInputStream().readUTF();
                     Log.d(TAG, "Got message from Client: "+message);

@@ -1,7 +1,12 @@
 package com.vasll.sockettictactoe;
 
+import static com.vasll.sockettictactoe.IntentKeys.SERVER_IP;
+import static com.vasll.sockettictactoe.IntentKeys.SERVER_PORT;
+import static com.vasll.sockettictactoe.IntentKeys.SOURCE_ACTIVITY_NAME;
+
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -52,10 +57,17 @@ public class LobbyActivity extends AppCompatActivity {
                 socket.receive(receivePacket);
                 String hostIp = receivePacket.getAddress().getHostAddress();
 
+                LobbyItemRow lobbyItemRow = new LobbyItemRow(this);
+                lobbyItemRow.setIpAddress(hostIp);
+                lobbyItemRow.setOnClickBtnJoinLobbyListener(v -> {
+                    Intent intent = new Intent(LobbyActivity.this, GameActivity.class);
+                    intent.putExtra(SOURCE_ACTIVITY_NAME, LobbyActivity.class.getName());
+                    intent.putExtra(SERVER_IP, hostIp);
+                    intent.putExtra(SERVER_PORT, 8888);
+                });
+
                 LobbyActivity.this.runOnUiThread(()->{
                     binding.linearLayout.removeAllViews();
-                    LobbyItemRow lobbyItemRow = new LobbyItemRow(this);
-                    lobbyItemRow.setIpAddress(hostIp);
                     binding.linearLayout.addView(lobbyItemRow);
                 });
 
