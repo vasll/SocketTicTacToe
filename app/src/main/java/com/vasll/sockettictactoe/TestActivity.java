@@ -21,7 +21,7 @@ import java.util.ArrayList;
 
 // TODO this is here just for debugging
 public class TestActivity extends AppCompatActivity {
-    private final static String TAG = "MainActivity";
+    private final static String TAG = "TestActivity";
     private ActivityTestBinding binding;
     private GameServer gameServer;
     private GameClient gameClient1, gameClient2;

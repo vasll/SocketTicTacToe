@@ -32,6 +32,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void onJoinGame() {
+        startActivity(new Intent(MainActivity.this, LobbyActivity.class));
+
         // TODO implement
         // 1. Open the LobbyActivity
         // 2. From the LobbyActivity, find games and make the user able to join a game

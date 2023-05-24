@@ -4,19 +4,17 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.vasll.sockettictactoe.R;
 import com.vasll.sockettictactoe.databinding.ActivityLobbyBinding;
-import com.vasll.sockettictactoe.databinding.ActivityMainBinding;
 import com.vasll.sockettictactoe.game.server.DiscoveryServer;
+import com.vasll.sockettictactoe.ui.LobbyItemRow;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.util.ArrayList;
-import java.util.List;
 
 public class LobbyActivity extends AppCompatActivity {
     private ActivityLobbyBinding binding;
@@ -28,9 +26,14 @@ public class LobbyActivity extends AppCompatActivity {
         binding = ActivityLobbyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        binding.btnDiscoverLobbies.setOnClickListener(v ->
-            new Thread(this::discoverLobbies).start()
+        LobbyItemRow lobbyItem = new LobbyItemRow(this);
+
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
         );
+
+        binding.linearLayout.addView(lobbyItem, layoutParams);
     }
 
     // TODO This is just some bad temporary code
