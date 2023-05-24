@@ -4,283 +4,43 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="18sp"
+    android:padding="24sp"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/btnStartServer"
-        style="@style/Widget.AppCompat.Button"
-        android:layout_width="376dp"
+    <TextView
+        android:id="@+id/tvTitle"
+        style="@style/TextAppearance.AppCompat.Headline"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Start server"
-        android:textSize="16sp"
+        android:text="TicTacToe"
+        android:textSize="36sp"
+        android:textStyle="bold|italic"
+        app:layout_constraintBottom_toTopOf="@+id/btnJoinGame"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnCreateGame"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:padding="14sp"
+        android:text="Create game"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
 
     <Button
-        android:id="@+id/btnStartClient1"
-        style="@style/Widget.AppCompat.Button"
-        android:layout_width="376dp"
-        android:layout_height="wrap_content"
-        android:text="Start client 1"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnStartClient2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.542"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <Button
-        android:id="@+id/btnStartClient2"
-        style="@style/Widget.AppCompat.Button"
-        android:layout_width="376dp"
-        android:layout_height="wrap_content"
-        android:text="Start client 2"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@+id/btnStartServer"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.514"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/etPort"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:ems="16"
-        android:hint="Port"
-        android:inputType="number"
-        android:text="8888"
-        app:layout_constraintBottom_toTopOf="@+id/btnOpenLobbyActivity"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.485"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <EditText
-        android:id="@+id/etIP"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:ems="16"
-        android:hint="IP"
-        android:inputType="text"
-        android:text="localhost"
-        app:layout_constraintBottom_toTopOf="@+id/etPort"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.058"
-        app:layout_constraintStart_toStartOf="parent" />
-
-    <TextView
-        android:id="@+id/tvClient1"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Client 1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/tvClient2"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="Client 2"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tlClient1" />
-
-    <TableLayout
-        android:id="@+id/tlClient1"
-        android:layout_width="376dp"
-        android:layout_height="wrap_content"
-        android:stretchColumns="*"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvClient1">
-
-        <TableRow
-            android:id="@+id/tr0Client1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/btnTable0"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable1"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable2"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="..." />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tr1Client1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/btnTable3"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable4"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable5"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tr2Client1"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/btnTable6"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable7"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable8"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-        </TableRow>
-
-    </TableLayout>
-
-    <TableLayout
-        android:id="@+id/tlClient2"
-        android:layout_width="376dp"
-        android:layout_height="wrap_content"
-        android:stretchColumns="*"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvClient2">
-
-        <TableRow
-            android:id="@+id/tr0Client2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/btnTable9"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable10"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable11"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="..." />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tr1Client2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/btnTable12"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable13"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable14"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-        </TableRow>
-
-        <TableRow
-            android:id="@+id/tr2Client2"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <Button
-                android:id="@+id/btnTable15"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable16"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:text="..." />
-
-            <Button
-                android:id="@+id/btnTable17"
-                style="@style/Widget.AppCompat.Button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="..." />
-        </TableRow>
-
-    </TableLayout>
-
-    <Button
-        android:id="@+id/btnOpenLobbyActivity"
+        android:id="@+id/btnJoinGame"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Open LobbyActivity"
-        style="@style/Widget.AppCompat.Button"
-        app:layout_constraintBottom_toTopOf="@+id/btnStartClient1"
+        android:layout_marginBottom="8dp"
+        android:padding="14sp"
+        android:text="Join game"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/btnCreateGame"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.457"
         app:layout_constraintStart_toStartOf="parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>
