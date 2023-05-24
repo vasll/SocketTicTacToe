@@ -13,7 +13,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toTopOf="@+id/btnDiscoverLobbies"
+        app:layout_constraintBottom_toTopOf="@+id/btnRefreshLobbies"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,10 +22,12 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/btnDiscoverLobbies"
+        android:id="@+id/btnRefreshLobbies"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Discover lobbies"
+        android:textSize="16sp"
+        android:text="Refresh lobbies"
+        style="@style/Widget.AppCompat.Button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

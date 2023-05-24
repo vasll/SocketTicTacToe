@@ -4,8 +4,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 import android.util.Log;
-import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.vasll.sockettictactoe.databinding.ActivityLobbyBinding;
 import com.vasll.sockettictactoe.game.server.DiscoveryServer;
@@ -25,19 +23,13 @@ public class LobbyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityLobbyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-
-        LobbyItemRow lobbyItem = new LobbyItemRow(this);
-
-        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-
-        binding.linearLayout.addView(lobbyItem, layoutParams);
+        binding.btnRefreshLobbies.setOnClickListener(v -> {
+            new Thread(this::refreshLobbies).start();
+        });
     }
 
-    // TODO This is just some bad temporary code
-    private void discoverLobbies(){
+    // TODO This code is bad
+    private void refreshLobbies(){
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setBroadcast(true);
 
@@ -52,17 +44,18 @@ public class LobbyActivity extends AppCompatActivity {
             byte[] receiveBuffer = new byte[responseBufferSize];
             DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, responseBufferSize);
 
-            // Set a timeout to wait for response (2 seconds in this example)
-            socket.setSoTimeout(2000);
+            // Set a timeout to wait for response (1.5 seconds in this example)
+            socket.setSoTimeout(1500);
 
             try {
                 socket.receive(receivePacket);
+                String hostIp = receivePacket.getAddress().getHostAddress();
 
-                // TODO move this in other function
                 LobbyActivity.this.runOnUiThread(()->{
-                    TextView tv = new TextView(this);
-                    tv.setText("Ip: "+receivePacket.getAddress().toString());
-                    binding.linearLayout.addView(tv);
+                    binding.linearLayout.removeAllViews();
+                    LobbyItemRow lobbyItemRow = new LobbyItemRow(this);
+                    lobbyItemRow.setIpAddress(hostIp);
+                    binding.linearLayout.addView(lobbyItemRow);
                 });
 
                 String responseMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
@@ -74,4 +67,7 @@ public class LobbyActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+
+
 }
