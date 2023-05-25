@@ -27,7 +27,7 @@ public class GameServer extends Thread {
     private final Board board;
     private int currentTurnPlayerId;  // Keeps the id of the user that has the turn
     private int player1Score = 0, player2Score = 0;
-    private int currentRound = 0;
+    private int currentRound = 1; // Rounds start from 1
     public final int port;
 
     private PlayerIOHandler player1IOHandler;
@@ -62,7 +62,8 @@ public class GameServer extends Thread {
             broadcastSendGame(); // Send information about the game
             broadcastBoard(); // Send initial board state to all players
         } catch (IOException e) {
-            Log.e(TAG, "IOException", e);
+            Log.w(TAG, "IOException", e);
+            return;
         } catch (JSONException e) {
             Log.e(TAG, "JSONException", e);
         }
@@ -172,12 +173,20 @@ public class GameServer extends Thread {
         }
     }
 
-    private void cleanUp() {
-        discoveryServer.close();
-        player1IOHandler.close();
-        player2IOHandler.close();
+    public void close() {
+        if (discoveryServer!=null) {
+            discoveryServer.close();
+        }
+        if (player1IOHandler!=null) {
+            player1IOHandler.close();
+        }
+        if (player2IOHandler!=null) {
+            player2IOHandler.close();
+        }
         try {
-            serverSocket.close();
+            if (!serverSocket.isClosed()) {
+                serverSocket.close();
+            }
         } catch (IOException e) {
             Log.w(TAG, "idk", e);
         }
@@ -231,7 +240,7 @@ public class GameServer extends Thread {
                             if(isGameFinished()) {
                                 broadcastBoard();
                                 broadcastEndGame();
-                                cleanUp();
+                                GameServer.this.close();
                                 return;
                             }
                             board.clear();
@@ -247,7 +256,7 @@ public class GameServer extends Thread {
                         if(isGameFinished()) {
                             broadcastBoard();
                             broadcastEndGame();
-                            cleanUp();
+                            GameServer.this.close();
                             return;
                         }
                         board.clear();

@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.TextView;
 
 import com.vasll.sockettictactoe.databinding.ActivityLobbyBinding;
 import com.vasll.sockettictactoe.game.server.DiscoveryServer;
@@ -29,13 +31,17 @@ public class LobbyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = ActivityLobbyBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
-        binding.btnRefreshLobbies.setOnClickListener(v -> {
-            new Thread(this::refreshLobbies).start();
-        });
+
+        new Thread(this::refreshLobbies).start(); // Initial lobby scan
+
+        binding.btnRefreshLobbies.setOnClickListener(v ->
+            new Thread(this::refreshLobbies).start()
+        );
     }
 
     // TODO This code is bad
     private void refreshLobbies(){
+        runOnUiThread(() -> binding.linearLayout.removeAllViews());
         try (DatagramSocket socket = new DatagramSocket()) {
             socket.setBroadcast(true);
 
@@ -67,14 +73,17 @@ public class LobbyActivity extends AppCompatActivity {
                     startActivity(intent);
                 });
 
-                LobbyActivity.this.runOnUiThread(()->{
-                    binding.linearLayout.removeAllViews();
-                    binding.linearLayout.addView(lobbyItemRow);
-                });
+                LobbyActivity.this.runOnUiThread(()-> binding.linearLayout.addView(lobbyItemRow));
 
                 String responseMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
                 Log.d(TAG, "Received response: " + responseMessage);
             } catch (IOException e) {
+                LobbyActivity.this.runOnUiThread(()->{
+                    TextView tv = new TextView(LobbyActivity.this);
+                    tv.setText("No lobbies found");
+                    tv.setTextAlignment(View.TEXT_ALIGNMENT_CENTER);
+                    binding.linearLayout.addView(tv);
+                });
                 Log.d(TAG, "No response received.");
             }
         } catch (IOException e) {

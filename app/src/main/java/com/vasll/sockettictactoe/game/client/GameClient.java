@@ -73,10 +73,14 @@ public class GameClient extends Thread {
         clientOutputHandler.makeMove(move);
     }
 
-    private void cleanUp() {
-        Log.d(TAG, "Cleaning up Client resources and exiting...");
-        clientInputHandler.interrupt();
-        clientOutputHandler.interrupt();
+    public void close() {
+        Log.d(TAG, "Cleaning up and exiting");
+        if (clientInputHandler!=null){
+            clientInputHandler.interrupt();
+        }
+        if (clientOutputHandler!=null){
+            clientOutputHandler.interrupt();
+        }
         this.interrupt();
     }
 
@@ -123,7 +127,7 @@ public class GameClient extends Thread {
                         case "end_round" -> handleEndRoundMessage(json);
                         case "end_game"-> {
                             handleEndGameMessage(json);
-                            cleanUp();
+                            close();
                             return;
                         }
                     }

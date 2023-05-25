@@ -25,9 +25,10 @@
         android:id="@+id/btnRefreshLobbies"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textSize="16sp"
         android:text="Refresh lobbies"
         style="@style/Widget.AppCompat.Button"
+        android:padding="14sp"
+        android:textSize="18sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

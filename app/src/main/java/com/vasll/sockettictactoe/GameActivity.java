@@ -21,12 +21,15 @@ import com.vasll.sockettictactoe.game.server.GameServer;
 import java.util.ArrayList;
 
 public class GameActivity extends AppCompatActivity {
+    private final static String TAG = "MainActivity";
     private ActivityGameBinding binding;
     private GameClient gameClient;
     private GameServer gameServer;
     private ArrayList<ArrayList<Button>> btnBoard = new ArrayList<>();
     private int myPlayerId, enemyPlayerId, maxRounds;
 
+
+    // TODO add onDestroy to shut down the server and client threads
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -34,6 +37,7 @@ public class GameActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         fillButtonBoard();
+        setEnabledButtonBoard(false);  // Disable all buttons
 
         String sourceActivityName = getIntent().getStringExtra(SOURCE_ACTIVITY_NAME);
         if(sourceActivityName.equals(LobbyActivity.class.getName())) {
@@ -41,6 +45,17 @@ public class GameActivity extends AppCompatActivity {
         }else if(sourceActivityName.equals(ServerActivity.class.getName())) {
             startFromServerActivity();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (gameClient!=null){
+            gameClient.close();
+        }
+        if (gameServer!=null){
+            gameServer.close();
+        }
+        super.onDestroy();
     }
 
     /**
@@ -72,9 +87,11 @@ public class GameActivity extends AppCompatActivity {
             if(nextTurnPlayerId==myPlayerId){
                 binding.tvYou.setTextColor(Color.GREEN);
                 binding.tvEnemy.setTextColor(Color.GRAY);
+                runOnUiThread(() -> setEnabledButtonBoard(true));
             } else {
                 binding.tvYou.setTextColor(Color.GRAY);
                 binding.tvEnemy.setTextColor(Color.GREEN);
+                runOnUiThread(() -> setEnabledButtonBoard(true));
             }
         });
 
@@ -99,9 +116,10 @@ public class GameActivity extends AppCompatActivity {
                 GameActivity.this.enemyPlayerId = enemyPlayerId;
                 GameActivity.this.maxRounds = maxRounds;
                 runOnUiThread(()-> {
+                    addListenersToBoard();
                     binding.tvYou.setText("P"+ myPlayerId);
                     binding.tvEnemy.setText("P"+ enemyPlayerId);
-                    binding.tvRoundCount.setText("Round 0/"+maxRounds); // TODO this is bad, rounds should start from 1 and not from 0 in the server
+                    binding.tvRoundCount.setText("Round 0/"+maxRounds);
                 });
             }
 
@@ -127,7 +145,6 @@ public class GameActivity extends AppCompatActivity {
         });
 
         gameClient.start();
-        addListenersToBoard();
     }
 
     private void updateBoard(char[][] board) {
@@ -148,6 +165,14 @@ public class GameActivity extends AppCompatActivity {
                 btnBoard.get(row).get(col).setOnClickListener(v -> {
                     gameClient.makeMove(new Move(finalRow, finalCol));
                 });
+            }
+        }
+    }
+
+    private void setEnabledButtonBoard(boolean enabled) {
+        for(int row=0; row<3; row++){
+            for(int col=0; col<3; col++){
+                btnBoard.get(row).get(col).setEnabled(enabled);
             }
         }
     }
