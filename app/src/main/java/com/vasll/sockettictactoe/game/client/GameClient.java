@@ -22,7 +22,7 @@ public class GameClient extends Thread {
     private static final String TAG = "GameClient";
     public final int port;
     public final String ip;
-    private int playerId, enemyId, maxRounds;
+    private int playerId, enemyId;
     private PlayerSocket playerSocket;
 
     private ClientInputHandler clientInputHandler;
@@ -49,14 +49,14 @@ public class GameClient extends Thread {
             JSONObject gameStart = new JSONObject(
                 (String) playerSocket.getDataInputStream().readUTF()
             );
-            // TODO check if message is good or not
+
             Log.d(TAG, "Received game_start: "+gameStart);
             playerId = gameStart.getInt("player_id");
             enemyId = gameStart.getInt("enemy_id");
-            maxRounds = gameStart.getInt("max_rounds");
+            int maxRounds = gameStart.getInt("max_rounds");
 
             for(GameListener gameListener : gameListeners){
-                gameListener.onGameStart(playerId,enemyId, maxRounds);
+                gameListener.onGameStart(playerId, enemyId, maxRounds);
             }
 
             clientInputHandler = new ClientInputHandler();
@@ -64,8 +64,10 @@ public class GameClient extends Thread {
 
             clientOutputHandler = new ClientOutputHandler();
             clientOutputHandler.start();
-        } catch (IOException | JSONException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            Log.e(TAG, "Error with socket connection or .readUTF()", e);
+        } catch (JSONException e) {
+            Log.w(TAG, "'game_start' message is not in the right format.", e);
         }
     }
 
@@ -123,7 +125,7 @@ public class GameClient extends Thread {
                     String message_type = json.getString("message_type");
                     switch (message_type){
                         case "board" -> handleBoardMessage(json);
-                        case "disconnect" -> handleDisconnectMessage(json);
+                        case "disconnect" -> handleDisconnectMessage();
                         case "end_round" -> handleEndRoundMessage(json);
                         case "end_game"-> {
                             handleEndGameMessage(json);
@@ -169,14 +171,16 @@ public class GameClient extends Thread {
             }
         }
 
-        private void handleDisconnectMessage(JSONObject message) throws JSONException {
-            // TODO implement
+        private void handleDisconnectMessage() throws JSONException {
+            for(GameListener gameListener : gameListeners){
+                gameListener.onEnemyDisconnect();
+            }
         }
     }
 
     /** Handles the input from the user and sends it as an output to the TicTacToe server */
     private class ClientOutputHandler extends Thread {
-        private final BlockingQueue<Move> moveQueue = new LinkedBlockingQueue<>();;
+        private final BlockingQueue<Move> moveQueue = new LinkedBlockingQueue<>();
 
         @Override
         public void run() {

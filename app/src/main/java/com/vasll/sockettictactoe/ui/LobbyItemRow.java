@@ -12,7 +12,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.vasll.sockettictactoe.R;
 
-// TODO implement, this no worky
+/** A row that shows the IP of a found game and has a button that can be pressed to join the game */
 public class LobbyItemRow extends ConstraintLayout {
     private TextView tvIpAddress;
     private Button btnJoinLobby;

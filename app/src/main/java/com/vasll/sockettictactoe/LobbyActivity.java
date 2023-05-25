@@ -39,7 +39,9 @@ public class LobbyActivity extends AppCompatActivity {
         );
     }
 
-    // TODO This code is bad
+    /**
+     * Refreshes the lobbies and updates the UI accordingly. This code can find only one lobby at a
+     * time but it is what it is **/
     private void refreshLobbies(){
         runOnUiThread(() -> binding.linearLayout.removeAllViews());
         try (DatagramSocket socket = new DatagramSocket()) {
@@ -57,8 +59,8 @@ public class LobbyActivity extends AppCompatActivity {
             DatagramPacket receivePacket = new DatagramPacket(receiveBuffer, responseBufferSize);
 
             // Set a timeout to wait for response (1.5 seconds in this example)
+            LobbyActivity.this.runOnUiThread(() -> binding.btnRefreshLobbies.setEnabled(false));
             socket.setSoTimeout(1500);
-
             try {
                 socket.receive(receivePacket);
                 String hostIp = receivePacket.getAddress().getHostAddress();
@@ -74,7 +76,6 @@ public class LobbyActivity extends AppCompatActivity {
                 });
 
                 LobbyActivity.this.runOnUiThread(()-> binding.linearLayout.addView(lobbyItemRow));
-
                 String responseMessage = new String(receivePacket.getData(), 0, receivePacket.getLength());
                 Log.d(TAG, "Received response: " + responseMessage);
             } catch (IOException e) {
@@ -86,6 +87,7 @@ public class LobbyActivity extends AppCompatActivity {
                 });
                 Log.d(TAG, "No response received.");
             }
+            LobbyActivity.this.runOnUiThread(() -> binding.btnRefreshLobbies.setEnabled(true));
         } catch (IOException e) {
             e.printStackTrace();
         }

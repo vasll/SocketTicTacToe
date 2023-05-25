@@ -134,37 +134,37 @@
     </LinearLayout>
 
     <TextView
-        android:id="@+id/tvYou"
+        android:id="@+id/tvClientId"
         style="@style/TextAppearance.MaterialComponents.Headline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="P..."
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:text="P..."
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/tvWinsClient"
+        android:id="@+id/tvClientWins"
         style="@style/TextAppearance.MaterialComponents.Headline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="W: 0"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/tvYou"
+        app:layout_constraintEnd_toStartOf="@+id/tvClientId"
         app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
-        android:id="@+id/tvLossesClient"
+        android:id="@+id/tvClientLosses"
         style="@style/TextAppearance.MaterialComponents.Headline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="L: 0"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tvYou" />
+        app:layout_constraintStart_toEndOf="@+id/tvClientId" />
 
     <TextView
-        android:id="@+id/tvEnemy"
+        android:id="@+id/tvEnemyId"
         style="@style/TextAppearance.MaterialComponents.Headline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -174,31 +174,31 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tvWinsEnemy"
+        android:id="@+id/tvEnemyWins"
         style="@style/TextAppearance.MaterialComponents.Headline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="W: 0"
-        app:layout_constraintEnd_toStartOf="@+id/tvEnemy"
+        app:layout_constraintEnd_toStartOf="@+id/tvEnemyId"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/tvLossesEnemy"
+        android:id="@+id/tvEnemyLosses"
         style="@style/TextAppearance.MaterialComponents.Headline4"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="L: 0"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/tvEnemy"
+        app:layout_constraintStart_toEndOf="@+id/tvEnemyId"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvRoundCount"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:text="Round .../..."
+        android:text="Waiting for player..."
         app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -208,8 +208,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="(you)"
-        app:layout_constraintBottom_toTopOf="@+id/tvYou"
-        app:layout_constraintEnd_toEndOf="@+id/tvYou"
-        app:layout_constraintStart_toStartOf="@+id/tvYou" />
+        android:textSize="18sp"
+        app:layout_constraintBottom_toTopOf="@+id/tvClientId"
+        app:layout_constraintEnd_toEndOf="@+id/tvClientId"
+        app:layout_constraintStart_toStartOf="@+id/tvClientId" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

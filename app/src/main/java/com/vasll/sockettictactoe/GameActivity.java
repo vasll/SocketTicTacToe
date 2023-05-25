@@ -21,15 +21,14 @@ import com.vasll.sockettictactoe.game.server.GameServer;
 import java.util.ArrayList;
 
 public class GameActivity extends AppCompatActivity {
-    private final static String TAG = "MainActivity";
+    // private final static String TAG = "MainActivity";
     private ActivityGameBinding binding;
     private GameClient gameClient;
     private GameServer gameServer;
-    private ArrayList<ArrayList<Button>> btnBoard = new ArrayList<>();
-    private int myPlayerId, enemyPlayerId, maxRounds;
+    private final ArrayList<ArrayList<Button>> btnBoard = new ArrayList<>();
+    private int clientPlayerId;
+    private int maxRounds;
 
-
-    // TODO add onDestroy to shut down the server and client threads
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,26 +83,26 @@ public class GameActivity extends AppCompatActivity {
 
         gameClient.addBoardUpdateListener((board, nextTurnPlayerId) -> {
             runOnUiThread(() -> updateBoard(board));
-            if(nextTurnPlayerId==myPlayerId){
-                binding.tvYou.setTextColor(Color.GREEN);
-                binding.tvEnemy.setTextColor(Color.GRAY);
+            if(nextTurnPlayerId== clientPlayerId){
+                binding.tvClientId.setTextColor(Color.GREEN);
+                binding.tvEnemyId.setTextColor(Color.GRAY);
                 runOnUiThread(() -> setEnabledButtonBoard(true));
             } else {
-                binding.tvYou.setTextColor(Color.GRAY);
-                binding.tvEnemy.setTextColor(Color.GREEN);
-                runOnUiThread(() -> setEnabledButtonBoard(true));
+                binding.tvClientId.setTextColor(Color.GRAY);
+                binding.tvEnemyId.setTextColor(Color.GREEN);
+                runOnUiThread(() -> setEnabledButtonBoard(false));
             }
         });
 
         gameClient.addRoundListener((player1Score, player2Score, currentRoundCount) -> {
             // Updates the player scores and round count
             runOnUiThread(()-> {
-                if(myPlayerId==1){
-                    binding.tvWinsClient.setText("W: "+player1Score);
-                    binding.tvWinsEnemy.setText("W: "+player2Score);
-                }else if(myPlayerId==2){
-                    binding.tvWinsClient.setText("W: "+player2Score);
-                    binding.tvWinsEnemy.setText("W: "+player1Score);
+                if(clientPlayerId ==1){
+                    binding.tvClientWins.setText("W: "+player1Score);
+                    binding.tvEnemyWins.setText("W: "+player2Score);
+                }else if(clientPlayerId ==2){
+                    binding.tvClientWins.setText("W: "+player2Score);
+                    binding.tvEnemyWins.setText("W: "+player1Score);
                 }
                 binding.tvRoundCount.setText("Round "+currentRoundCount+"/"+maxRounds);
             });
@@ -112,13 +111,12 @@ public class GameActivity extends AppCompatActivity {
         gameClient.addGameListener(new GameListener() {
             @Override
             public void onGameStart(int yourPlayerId, int enemyPlayerId, int maxRounds) {
-                myPlayerId = yourPlayerId;
-                GameActivity.this.enemyPlayerId = enemyPlayerId;
+                clientPlayerId = yourPlayerId;
                 GameActivity.this.maxRounds = maxRounds;
                 runOnUiThread(()-> {
                     addListenersToBoard();
-                    binding.tvYou.setText("P"+ myPlayerId);
-                    binding.tvEnemy.setText("P"+ enemyPlayerId);
+                    binding.tvClientId.setText("P"+ clientPlayerId);
+                    binding.tvEnemyId.setText("P"+ enemyPlayerId);
                     binding.tvRoundCount.setText("Round 0/"+maxRounds);
                 });
             }
@@ -126,12 +124,12 @@ public class GameActivity extends AppCompatActivity {
             @Override
             public void onGameEnd(int player1Score, int player2Score) {
                 runOnUiThread(()-> {
-                    if(myPlayerId==1){
-                        binding.tvWinsClient.setText("W: "+player1Score);
-                        binding.tvWinsEnemy.setText("W: "+player2Score);
-                    }else if(myPlayerId==2){
-                        binding.tvWinsClient.setText("W: "+player2Score);
-                        binding.tvWinsEnemy.setText("W: "+player1Score);
+                    if(clientPlayerId ==1){
+                        binding.tvClientWins.setText("W: "+player1Score);
+                        binding.tvEnemyWins.setText("W: "+player2Score);
+                    }else if(clientPlayerId ==2){
+                        binding.tvClientWins.setText("W: "+player2Score);
+                        binding.tvEnemyWins.setText("W: "+player1Score);
                     }
                     binding.tvRoundCount.setText("Round "+maxRounds+"/"+maxRounds);
 
@@ -141,6 +139,13 @@ public class GameActivity extends AppCompatActivity {
                         Toast.makeText(GameActivity.this, "P2 has won!", Toast.LENGTH_LONG).show();
                     }
                 });
+            }
+
+            @Override
+            public void onEnemyDisconnect() {
+                setEnabledButtonBoard(false);
+                Toast.makeText(GameActivity.this, "Enemy has quit the game.", Toast.LENGTH_LONG)
+                    .show();
             }
         });
 
