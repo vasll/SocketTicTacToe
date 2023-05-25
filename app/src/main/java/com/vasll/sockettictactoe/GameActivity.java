@@ -7,8 +7,10 @@ import static com.vasll.sockettictactoe.IntentKeys.SOURCE_ACTIVITY_NAME;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.Color;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.vasll.sockettictactoe.databinding.ActivityGameBinding;
 import com.vasll.sockettictactoe.game.client.GameClient;
@@ -67,6 +69,13 @@ public class GameActivity extends AppCompatActivity {
 
         gameClient.addBoardUpdateListener((board, nextTurnPlayerId) -> {
             runOnUiThread(() -> updateBoard(board));
+            if(nextTurnPlayerId==myPlayerId){
+                binding.tvYou.setTextColor(Color.GREEN);
+                binding.tvEnemy.setTextColor(Color.GRAY);
+            } else {
+                binding.tvYou.setTextColor(Color.GRAY);
+                binding.tvEnemy.setTextColor(Color.GREEN);
+            }
         });
 
         gameClient.addRoundListener((player1Score, player2Score, currentRoundCount) -> {
@@ -92,13 +101,28 @@ public class GameActivity extends AppCompatActivity {
                 runOnUiThread(()-> {
                     binding.tvYou.setText("P"+ myPlayerId);
                     binding.tvEnemy.setText("P"+ enemyPlayerId);
-                    binding.tvRoundCount.setText("Round 0/"+maxRounds);
+                    binding.tvRoundCount.setText("Round 0/"+maxRounds); // TODO this is bad, rounds should start from 1 and not from 0 in the server
                 });
             }
 
             @Override
             public void onGameEnd(int player1Score, int player2Score) {
-                // TODO implement
+                runOnUiThread(()-> {
+                    if(myPlayerId==1){
+                        binding.tvWinsClient.setText("W: "+player1Score);
+                        binding.tvWinsEnemy.setText("W: "+player2Score);
+                    }else if(myPlayerId==2){
+                        binding.tvWinsClient.setText("W: "+player2Score);
+                        binding.tvWinsEnemy.setText("W: "+player1Score);
+                    }
+                    binding.tvRoundCount.setText("Round "+maxRounds+"/"+maxRounds);
+
+                    if(player1Score>player2Score) {
+                        Toast.makeText(GameActivity.this, "P1 has won!", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(GameActivity.this, "P2 has won!", Toast.LENGTH_LONG).show();
+                    }
+                });
             }
         });
 

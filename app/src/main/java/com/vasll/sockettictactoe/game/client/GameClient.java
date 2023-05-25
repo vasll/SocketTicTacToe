@@ -50,20 +50,14 @@ public class GameClient extends Thread {
                 (String) playerSocket.getDataInputStream().readUTF()
             );
             // TODO check if handshake is good or not
+            // TODO rename handshake to game_start
             Log.d(TAG, "Received handshake: "+handshake);
             playerId = handshake.getInt("player_id");
             enemyId = handshake.getInt("enemy_id");
             maxRounds = handshake.getInt("max_rounds");
 
-            // TODO rename handshake to game_start and notify listeners
-            if(playerId==1){
-                for(GameListener gameListener : gameListeners){
-                    gameListener.onGameStart(1,2, maxRounds);
-                }
-            } else if(playerId==2){
-                for(GameListener gameListener : gameListeners){
-                    gameListener.onGameStart(2,1, maxRounds);
-                }
+            for(GameListener gameListener : gameListeners){
+                gameListener.onGameStart(playerId,enemyId, maxRounds);
             }
 
             clientInputHandler = new ClientInputHandler();
