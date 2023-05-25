@@ -59,7 +59,7 @@ public class GameServer extends Thread {
             socketPlayer2 = new PlayerSocket(serverSocket.accept());
             Log.i(TAG, "Player2 connected!");
 
-            broadcastHandshake(); // Send information about the game
+            broadcastSendGame(); // Send information about the game
             broadcastBoard(); // Send initial board state to all players
         } catch (IOException e) {
             Log.e(TAG, "IOException", e);
@@ -76,25 +76,25 @@ public class GameServer extends Thread {
         Log.i(TAG, "ServerGameHandler OK");
     }
 
-    /** 'handshake' Message
+    /** 'start_game' Message
      * Sends information about the new game. Each player will receive what their
      * ID is (either 1 or 2) and what the id of the enemy player is. */
-    private void broadcastHandshake() throws IOException, JSONException {
+    private void broadcastSendGame() throws IOException, JSONException {
         JSONObject jsonPlayer1 = new JSONObject()   // Message for player1
-                .put("message_type", "handshake")
+                .put("message_type", "start_game")
                 .put("player_id", 1).put("enemy_id", 2)
                 .put("max_rounds", maxRounds);
 
         JSONObject jsonPlayer2 = new JSONObject()   // Message for player2
-                .put("message_type", "handshake")
+                .put("message_type", "start_game")
                 .put("player_id", 2).put("enemy_id", 1)
                 .put("max_rounds", maxRounds);
 
-        Log.d(TAG, "broadcastHandshake() - sending message: "+jsonPlayer1);
+        Log.d(TAG, "broadcastSendGame() - sending message: "+jsonPlayer1);
         socketPlayer1.getDataOutputStream().writeUTF(jsonPlayer1.toString());
         socketPlayer1.getDataOutputStream().flush();
 
-        Log.d(TAG, "broadcastHandshake() - sending message: "+jsonPlayer2);
+        Log.d(TAG, "broadcastSendGame() - sending message: "+jsonPlayer2);
         socketPlayer2.getDataOutputStream().writeUTF(jsonPlayer2.toString());
         socketPlayer2.getDataOutputStream().flush();
     }

@@ -44,17 +44,16 @@ public class GameClient extends Thread {
             playerSocket = new PlayerSocket(new Socket(ip, port));
             Log.i(TAG, "Connection to Socket OK");
 
-            // Handshake check
-            Log.d(TAG, "Waiting for handshake...");
-            JSONObject handshake = new JSONObject(
+            // Wait for game_start
+            Log.d(TAG, "Waiting for game_start...");
+            JSONObject gameStart = new JSONObject(
                 (String) playerSocket.getDataInputStream().readUTF()
             );
-            // TODO check if handshake is good or not
-            // TODO rename handshake to game_start
-            Log.d(TAG, "Received handshake: "+handshake);
-            playerId = handshake.getInt("player_id");
-            enemyId = handshake.getInt("enemy_id");
-            maxRounds = handshake.getInt("max_rounds");
+            // TODO check if message is good or not
+            Log.d(TAG, "Received game_start: "+gameStart);
+            playerId = gameStart.getInt("player_id");
+            enemyId = gameStart.getInt("enemy_id");
+            maxRounds = gameStart.getInt("max_rounds");
 
             for(GameListener gameListener : gameListeners){
                 gameListener.onGameStart(playerId,enemyId, maxRounds);
