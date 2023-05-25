@@ -27,7 +27,7 @@ public class GameServer extends Thread {
     private final Board board;
     private int currentTurnPlayerId;  // Keeps the id of the user that has the turn
     private int player1Score = 0, player2Score = 0;
-    private int currentRound = 1; // Rounds start from 1
+    private int currentRound = 0;
     public final int port;
 
     private PlayerIOHandler player1IOHandler;

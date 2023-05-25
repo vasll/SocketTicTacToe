@@ -79,11 +79,12 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void bindGameClient(String serverIp, int serverPort) {
+        // TODO update losses counter
         gameClient = new GameClient(serverIp, serverPort);
 
         gameClient.addBoardUpdateListener((board, nextTurnPlayerId) -> {
             runOnUiThread(() -> updateBoard(board));
-            if(nextTurnPlayerId== clientPlayerId){
+            if(nextTurnPlayerId==clientPlayerId){
                 binding.tvClientId.setTextColor(Color.GREEN);
                 binding.tvEnemyId.setTextColor(Color.GRAY);
                 runOnUiThread(() -> setEnabledButtonBoard(true));
@@ -97,14 +98,14 @@ public class GameActivity extends AppCompatActivity {
         gameClient.addRoundListener((player1Score, player2Score, currentRoundCount) -> {
             // Updates the player scores and round count
             runOnUiThread(()-> {
-                if(clientPlayerId ==1){
+                if(clientPlayerId==1){
                     binding.tvClientWins.setText("W: "+player1Score);
                     binding.tvEnemyWins.setText("W: "+player2Score);
                 }else if(clientPlayerId ==2){
                     binding.tvClientWins.setText("W: "+player2Score);
                     binding.tvEnemyWins.setText("W: "+player1Score);
                 }
-                binding.tvRoundCount.setText("Round "+currentRoundCount+"/"+maxRounds);
+                binding.tvRoundCount.setText("Round "+(currentRoundCount+1)+"/"+maxRounds);
             });
         });
 
@@ -117,7 +118,7 @@ public class GameActivity extends AppCompatActivity {
                     addListenersToBoard();
                     binding.tvClientId.setText("P"+ clientPlayerId);
                     binding.tvEnemyId.setText("P"+ enemyPlayerId);
-                    binding.tvRoundCount.setText("Round 0/"+maxRounds);
+                    binding.tvRoundCount.setText("Round 1/"+maxRounds);
                 });
             }
 
