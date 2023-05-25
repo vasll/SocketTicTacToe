@@ -173,14 +173,13 @@ public class GameServer extends Thread {
     }
 
     private void cleanUp() {
-        // TODO IMPORTANT: close DiscoveryServer
         discoveryServer.close();
+        player1IOHandler.close();
+        player2IOHandler.close();
         try {
-            if(!serverSocket.isClosed()){
-                serverSocket.close();
-            }
+            serverSocket.close();
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            Log.w(TAG, "idk", e);
         }
     }
 
@@ -189,6 +188,7 @@ public class GameServer extends Thread {
         private static final String TAG = "Server-PlayerIOHandler";
         private final PlayerSocket playerSocket;
         private final char charOfPlayer;
+        private boolean isCloseRequested = false;
 
         public PlayerIOHandler(PlayerSocket playerSocket, char charOfPlayer) {
             this.playerSocket = playerSocket;
@@ -258,10 +258,21 @@ public class GameServer extends Thread {
                     broadcastBoard();
                 }
             } catch (IOException e) {
+                if (isCloseRequested) {
+                    Log.i(TAG, "Closing GameServer");
+                    return;
+                }
                 Log.e(TAG, "IOException", e);
             } catch (JSONException e) {
                 Log.e(TAG, "JSONException", e);
             }
+        }
+
+        public void close() {
+            isCloseRequested = true;
+            try {
+                playerSocket.getSocket().close();
+            } catch (IOException ignored) {}
         }
     }
 }

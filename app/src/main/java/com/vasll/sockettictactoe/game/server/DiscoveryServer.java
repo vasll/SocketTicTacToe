@@ -16,6 +16,7 @@ public class DiscoveryServer extends Thread {
     public static final String DISCOVERY_MESSAGE = "SOCKET-TIC-TAC-TOE-GAME";
     public final int port;
     private DatagramSocket socket;
+    private boolean isCloseRequested = false;
 
     public DiscoveryServer(int port) {
         this.port = port;
@@ -50,14 +51,16 @@ public class DiscoveryServer extends Thread {
                 }
             }
         } catch (IOException e) {
-            // This exception is raised on this.close()
-            // I couldn't come up with a better Thread close/exit mechanism
-            Log.i(TAG, "Closing DiscoveryServer");
-            socket.close();
+            if (isCloseRequested) {
+                Log.i(TAG, "Closing DiscoveryServer");
+                return;
+            }
+            Log.e(TAG, "IOException", e);
         }
     }
 
     public void close() {
+        isCloseRequested = true;
         socket.close();
     }
 }
