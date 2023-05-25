@@ -64,6 +64,7 @@ public class LobbyActivity extends AppCompatActivity {
                     intent.putExtra(SOURCE_ACTIVITY_NAME, LobbyActivity.class.getName());
                     intent.putExtra(SERVER_IP, hostIp);
                     intent.putExtra(SERVER_PORT, 8888);
+                    startActivity(intent);
                 });
 
                 LobbyActivity.this.runOnUiThread(()->{

@@ -8,6 +8,7 @@
     tools:context=".GameActivity">
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="0dp"
         android:layout_height="390dp"
         android:orientation="vertical"
@@ -137,7 +138,7 @@
         style="@style/TextAppearance.MaterialComponents.Headline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="You"
+        android:text="P..."
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
@@ -167,7 +168,7 @@
         style="@style/TextAppearance.MaterialComponents.Headline3"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Enemy"
+        android:text="P..."
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -191,5 +192,24 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/tvEnemy"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/tvRoundCount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/TextAppearance.MaterialComponents.Headline6"
+        android:text="Round .../..."
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout2"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="(you)"
+        app:layout_constraintBottom_toTopOf="@+id/tvYou"
+        app:layout_constraintEnd_toEndOf="@+id/tvYou"
+        app:layout_constraintStart_toStartOf="@+id/tvYou" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -22,7 +22,7 @@ public class GameClient extends Thread {
     private static final String TAG = "GameClient";
     public final int port;
     public final String ip;
-    private int playerId, enemyId;
+    private int playerId, enemyId, maxRounds;
     private PlayerSocket playerSocket;
 
     private ClientInputHandler clientInputHandler;
@@ -53,8 +53,18 @@ public class GameClient extends Thread {
             Log.d(TAG, "Received handshake: "+handshake);
             playerId = handshake.getInt("player_id");
             enemyId = handshake.getInt("enemy_id");
+            maxRounds = handshake.getInt("max_rounds");
 
             // TODO rename handshake to game_start and notify listeners
+            if(playerId==1){
+                for(GameListener gameListener : gameListeners){
+                    gameListener.onGameStart(1,2, maxRounds);
+                }
+            } else if(playerId==2){
+                for(GameListener gameListener : gameListeners){
+                    gameListener.onGameStart(2,1, maxRounds);
+                }
+            }
 
             clientInputHandler = new ClientInputHandler();
             clientInputHandler.start();
