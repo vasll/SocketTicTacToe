@@ -28,6 +28,8 @@ public class GameActivity extends AppCompatActivity {
     private final ArrayList<ArrayList<Button>> btnBoard = new ArrayList<>();
     private int clientPlayerId;
     private int maxRounds;
+    private int scoreClientPlayer = 0, scoreEnemyPlayer = 0;
+    private int lossesClientPlayer = 0, lossesEnemyPlayer = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,7 +81,6 @@ public class GameActivity extends AppCompatActivity {
     }
 
     private void bindGameClient(String serverIp, int serverPort) {
-        // TODO update losses counter
         gameClient = new GameClient(serverIp, serverPort);
 
         gameClient.addBoardUpdateListener((board, nextTurnPlayerId) -> {
@@ -97,13 +98,37 @@ public class GameActivity extends AppCompatActivity {
 
         gameClient.addRoundListener((player1Score, player2Score, currentRoundCount) -> {
             // Updates the player scores and round count
+            // This is bad code but whatever
             runOnUiThread(()-> {
                 if(clientPlayerId==1){
+                    if(player1Score > scoreClientPlayer) {
+                        lossesEnemyPlayer += 1;
+                    }
+                    if(player2Score > scoreEnemyPlayer) {
+                        lossesClientPlayer += 1;
+
+                    }
+                    scoreClientPlayer = player1Score;
+                    scoreEnemyPlayer += player2Score;
+
                     binding.tvClientWins.setText("W: "+player1Score);
                     binding.tvEnemyWins.setText("W: "+player2Score);
+                    binding.tvClientLosses.setText("L: "+lossesClientPlayer);
+                    binding.tvEnemyLosses.setText("L: "+lossesEnemyPlayer);
                 }else if(clientPlayerId ==2){
+                    if(player2Score > scoreClientPlayer) {
+                        lossesEnemyPlayer += 1;
+                    }
+                    if(player1Score > scoreEnemyPlayer) {
+                        lossesClientPlayer += 1;
+                    }
+                    scoreClientPlayer = player2Score;
+                    scoreEnemyPlayer += player1Score;
+
                     binding.tvClientWins.setText("W: "+player2Score);
                     binding.tvEnemyWins.setText("W: "+player1Score);
+                    binding.tvClientLosses.setText("L: "+lossesClientPlayer);
+                    binding.tvEnemyLosses.setText("L: "+lossesEnemyPlayer);
                 }
                 binding.tvRoundCount.setText("Round "+(currentRoundCount+1)+"/"+maxRounds);
             });
