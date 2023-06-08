@@ -1,2 +1,3 @@
-# TicTacToe-Android
-An Android TicTacToe game that works on localhost using Java Sockets.
+# TicTacToe-Android (school project)
+
+Simple Android TicTacToe game that works using Java Sockets.
